@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+        <!-- Page Content -->
+        <!-- ============================================================== -->
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">Dispose</h4>
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li class="active">Dispose</li>
+                        </ol>
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+                <!-- /row -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="white-box">
+                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="status" id="id_status" onchange="Filter()">
+                                    <option value="">--</option>
+                                    <option value="处理中">处理中</option>
+                                    <option value="按期结办">按期结办</option>
+                                    <option value="逾期结办">逾期结办</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="event_type" id="id_event_type" onchange="Filter()">
+                                    <option value="">--</option>
+                                    {% for type in types %}
+                                        <option value="{{ type }}">{{ type }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="property" id="id_property" onchange="Filter()">
+                                    <option value="">--</option>
+                                    {% for pro in properties %}
+                                        <option value="{{ pro }}">{{ pro }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <h3 class="box-title">List</h3>
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>序号</th>
+                                            <th>统计时间</th>
+                                            <th>所属街道和社区</th>
+                                            <th>问题性质</th>
+                                            <th>问题类型</th>
+                                            <th>问题大类</th>
+                                            <th>问题小类</th>
+                                            <th>问题来源</th>
+                                            <th>处置状态</th>
+                                            <th>处置情况</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for event in event_list %}
+                                        <tr class="event" id="{{ event.rec_id }}">
+                                            <td>{{ event.rec_id }}</td>
+                                            <td>{{ event.create_time }}</td>
+                                            <td>{{ event.community.street }} {{ event.community }}</td>
+                                            <td>{{ event.property }}</td>
+                                            <td>{{ event.sub_type.main_type.type }}</td>
+                                            <td>{{ event.sub_type.main_type }}</td>
+                                            <td>{{ event.sub_type }}</td>
+                                            <td>{{ event.event_src }}</td>
+                                            {% if event.achieve.status == 'intime_to' %}
+                                                <td class="achieve">处理中</td>
+                                                <td class="status"><a onclick="Filter('intime', '{{ event.rec_id }}')" class="btn btn btn-rounded btn-default btn-outline m-r-5"><i class="ti-check text-success m-r-5"></i>按期</a><a onclick="Filter('overtime', '{{ event.rec_id }}')" class="btn-rounded btn btn-default btn-outline"><i class="ti-close text-danger m-r-5"></i>逾期</a></td>
+                                            {% elif event.achieve.status == 'intime' %}
+                                                <td>按期办结</td>
+                                                <td></td>
+                                            {% elif event.achieve.status == 'overtime' %}
+                                                <td>逾期办结</td>
+                                                <td></td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+            {% include 'footer.html' %}
+            </div>
+            <script type="text/javascript">
+                function Filter(method="filter", eventID) {
+                    if ("WebSocket" in window) {
+                        //alert("您的浏览器支持WebSocket!");
+                        let ws = new WebSocket("ws://"+ window.location.host + "/ws/event/list/");
+                        let searchValue = document.getElementById('search_id').value;
+                        let statusValue = document.getElementById("id_status").value;
+                        let typeValue = document.getElementById("id_event_type").value;
+                        let propertyValue = document.getElementById("id_property").value;
+                        ws.onopen = function () {
+                            ws.send(JSON.stringify({
+                                'method': method,
+                                'rec_id': eventID,
+                                'search': searchValue,
+                                'status': statusValue,
+                                'event_type': typeValue,
+                                'property': propertyValue,
+                            }));
+                        };
+                        ws.onmessage = function (evt) {
+                            let received_msg = JSON.parse(evt.data);
+                            let hideList = received_msg['hide_list'];
+                            let disList = received_msg['dis_list'];
+                            let eventList = document.querySelectorAll("tr.event");
+                            if (method !== "filter") {
+                                for (let i=0; i < eventList.length; i++) {
+                                    if (eventList[i].getAttribute('id') === eventID) {
+                                        let achieveElement = eventList[i].getElementsByClassName("achieve")[0];
+                                        let statusElement = eventList[i].getElementsByClassName('status')[0];
+                                        statusElement.innerHTML = "<td></td>";
+                                        if (method === 'intime') {
+                                            achieveElement.innerHTML = "<td>按期办结</td>";
+                                        }
+                                        else {
+                                            achieveElement.innerHTML = "<td>逾期办结</td>";
+                                        }
+                                    }
+                                }
+                            }
+                            if (hideList.length) {
+                                for (let i = 0; i < eventList.length; i++) {
+                                    for (let j = 0; j < hideList.length; j++) {
+                                        if (eventList[i].getAttribute('id') === hideList[j]) {
+                                            eventList[i].setAttribute("hidden", true);
+                                        }
+                                    }
+                                }
+                            }
+                            if (disList.length) {
+                                for (let i = 0; i < eventList.length; i++) {
+                                    for (let j = 0; j < disList.length; j++) {
+                                        if (eventList[i].getAttribute('id') === disList[j]) {
+                                            eventList[i].removeAttribute('hidden');
+                                        }
+                                    }
+                                }
+                            }
+                        };
+
+                        ws.onclose = function () {
+                            //alert("WebSocket连接已关闭...");
+                        };
+                    }
+                    else {
+                        alert("你的浏览器不支持WebSocket!");
+                    }
+                }
+            </script>
+        <!-- /#page-wrapper -->
+{% endblock content %}

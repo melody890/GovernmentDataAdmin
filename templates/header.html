@@ -1,0 +1,67 @@
+{% load static %}
+        <!-- Top_bar header - style you can find in pages.scss -->
+        <!-- ============================================================== -->
+        <nav class="navbar navbar-default navbar-static-top m-b-0">
+            <div class="navbar-header">
+                <div class="top-left-part">
+                    <!-- Logo -->
+                    <a class="logo" href="charts/charts.html">
+                        <!-- Logo icon image, you can use font-icon also -->
+                        <b>
+                            <!--This is dark logo icon-->
+                            <img src="{% static 'plugins/images/logo.png' %}" alt="home" class="dark-logo" />
+                            <!--This is light logo icon-->
+                            <img src="{% static 'plugins/images/logo.png' %}" alt="home" class="light-logo" />
+                        </b>
+                        <!-- Logo text image you can use text also -->
+                        <span class="hidden-xs">
+                            <!--This is dark logo text-->
+                            <img src="{% static 'plugins/images/admin-text.png' %}" alt="home" class="dark-logo" />
+                            <!--This is light logo text-->
+                            <img src="{% static 'plugins/images/admin-text-dark.png' %}" alt="home" class="light-logo" />
+                        </span>
+                    </a>
+                </div>
+                <!-- /Logo -->
+                <ul class="nav navbar-top-links navbar-right pull-right">
+                    <li>
+                        <form role="search" method="GET" class="app-search hidden-sm hidden-xs m-r-10">
+                            {% if search %}
+                                <input type="text" name="search" id="search_id" class="form-control" value="{{ search }}" required>
+                            {% else %}
+                                <input type="text" name="search" id="search_id" placeholder="Search..." class="form-control" required>
+                            {% endif %}
+                            <a>
+                                <i class="fa fa-search" onclick="search()"></i>
+                                <script type="text/javascript" language="JavaScript">
+                                    function search() {
+                                        let searchBar = document.getElementById("search_id");
+                                        let toUrl = "http://" + self.location.host + "/event/dispose?search=" + searchBar.value;
+                                        self.location.href = toUrl;
+                                    }
+                                </script>
+                            </a>
+                        </form>
+                    </li>
+                    <li>
+                        <a href="{% url 'user:logout' %}" class="waves-effect">&nbsp<i class="fa fa-power-off fa-fw" style=""></i></a>
+                    </li>
+                    <li>
+                        <a class="profile-pic">
+                            {% if profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="user-img" width="36" class="img-circle">
+                            {% else %}
+                            <img src="{% static 'plugins/images/users/admin.png' %}" alt="user-img" width="36" class="img-circle">
+                            {% endif %}
+                            <b class="hidden-xs">{{ user.username }}</b>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-header -->
+            <!-- /.navbar-top-links -->
+            <!-- /.navbar-static-side -->
+        </nav>
+        <!-- End Top Navigation -->
+        <!-- ============================================================== -->
