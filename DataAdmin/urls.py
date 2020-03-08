@@ -16,12 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import include
 from django.urls import path
-from chart.views import IndexView
+from user.views import index
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('chart/', include('chart.urls', namespace='chart')),
     path('event/', include('event.urls', namespace='event')),
     path('user/', include('user.urls', namespace='user')),
-    path('', IndexView.as_view(), name='index')
+    path('', index, name='index')
 ]

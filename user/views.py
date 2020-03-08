@@ -8,6 +8,14 @@ from .forms import UserLoginForm, UserRegisterForm, ProfileForm
 from .models import Profile
 
 
+def index(request):
+    user = request.user
+    if user.is_authenticated:
+        return redirect(to="chart:charts")
+    else:
+        return redirect(to="user:login")
+
+
 def user_login(request):
     user = request.user
     if user.is_authenticated:
