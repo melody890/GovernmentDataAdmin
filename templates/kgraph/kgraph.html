@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+        <!-- Page Content -->
+        <!-- ============================================================== -->
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">Kgraph</h4>
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li class="active">Kgraph</li>
+                        </ol>
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="white-box">
+                            <div id="graph" class="chart-container" style="height: 800px;"></div>
+                            <script>
+                                let graph_chart = echarts.init(
+                                    document.getElementById('graph'), 'white', {renderer: 'svg'}
+                                );
+                                graph_chart.setOption({{ graph | safe}});
+                            </script>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+            {% include 'footer.html' %}
+        </div>
+        <!-- ============================================================== -->
+        <!-- End Page Content -->
+{% endblock content %}
+
+{% block script %}
+
+{% endblock script %}

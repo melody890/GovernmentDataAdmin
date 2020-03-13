@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'chart',
     'event',
     'user',
+    'kgraph',
 ]
 
 MIDDLEWARE = [

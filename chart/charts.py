@@ -16,7 +16,7 @@ BAIDU_MAP_AK = 'X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W'
 
 
 def get_date(days):
-    day = (date.today() - timedelta(days=days))
+    day = (date.today() - timedelta(days=365) - timedelta(days=days))
     return day
 
 
@@ -210,7 +210,7 @@ class Charts:
 
     def calendar_base(self) -> Calendar:
         begin = get_date(365)
-        end = datetime.date.today()
+        end = datetime.date.today()-timedelta(days=365)
         max_num = 0
         data = []
         for i in range((end-begin).days+1):
@@ -231,7 +231,7 @@ class Charts:
                  )
             .set_global_opts(
                 visualmap_opts=opts.VisualMapOpts(
-                    max_=1001,
+                    max_=501,
                     min_=1,
                     orient="horizontal",
                     is_piecewise=True,

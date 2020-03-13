@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 from .forms import EventForm
 from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType
@@ -46,12 +47,12 @@ def event_post(request):
 @login_required(login_url='/user/login/')
 def event_list(request):
     search = request.GET.get('search')
-    event_list = Event.objects.all()
+    events = Event.objects.all()
     properties = Property.objects.all()
     types = Type.objects.all()
 
     if search:
-        event_list = event_list.filter(
+        events = events.filter(
             Q(dispose_unit__name=search) |
             Q(event_src__name=search) |
             Q(property__name=search) |
@@ -64,6 +65,10 @@ def event_list(request):
         )
     else:
         search = ""
+
+    paginator = Paginator(events, 20)
+    page = request.GET.get('page')
+    event_list = paginator.get_page(page)
 
     context = {
         "properties": properties,

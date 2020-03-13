@@ -23,5 +23,6 @@ urlpatterns = [
     path('chart/', include('chart.urls', namespace='chart')),
     path('event/', include('event.urls', namespace='event')),
     path('user/', include('user.urls', namespace='user')),
+    path('kgraph/', include('kgraph.urls', namespace='kgraph')),
     path('', index, name='index')
 ]

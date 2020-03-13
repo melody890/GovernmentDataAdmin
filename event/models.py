@@ -150,7 +150,7 @@ class Event(models.Model):
     create_time = models.DateField(default=timezone.now)
     # 报告编号
     report_num = models.ForeignKey(
-        OperateNumber,
+        ReportNumber,
         default=1,
         on_delete=models.CASCADE,
         related_name='event',
@@ -160,7 +160,7 @@ class Event(models.Model):
         OperateNumber,
         default=1,
         on_delete=models.CASCADE,
-        related_name='_event',
+        related_name='event',
     )
     # 发生地点
     occur_place = models.ForeignKey(
