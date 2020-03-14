@@ -3,6 +3,7 @@ from django.db.models import Q
 import json
 
 from .models import MainType, Type, Street, Event, Achieve
+from .views import my_filter
 
 
 class PostDataConsumer(WebsocketConsumer):
@@ -73,17 +74,7 @@ class ListDataConsumer(WebsocketConsumer):
         length = len(event_list)
 
         if search:
-            event_list = event_list.filter(
-                Q(dispose_unit__name=search) |
-                Q(event_src__name=search) |
-                Q(property__name=search) |
-                Q(community__name=search) |
-                Q(community__street__name=search) |
-                Q(community__street__district__name=search) |
-                Q(sub_type__name=search) |
-                Q(sub_type__main_type__name=search) |
-                Q(sub_type__main_type__type__name=search)
-            )
+            event_list = my_filter(search, event_list)
 
         if event_type:
             event_list = event_list.filter(

@@ -9,23 +9,23 @@ from pyecharts import options as opts
 from pyecharts.globals import SymbolType, GeoType
 from pyecharts.datasets import register_url
 
-from event.models import Event, Street, Type, Property, Achieve, DisposeUnit, Community, EventSource
+from event.models import Event, Street, Type, Property, Achieve, DisposeUnit, Community, EventSource, MainType
 
 
 BAIDU_MAP_AK = 'X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W'
 
 
 def get_date(days):
-    day = (date.today() - timedelta(days=365) - timedelta(days=days))
+    day = (date.today() - timedelta(days=465) - timedelta(days=days))
     return day
 
 
 def get_recent_date(num):
     date_list = []
     for i in range(num):
-        day = get_date(num-i)
-        date_info = [day.year, day.month, day.day]
-        date_list.append(date_info)
+        day = get_date(num-i+20)
+
+        date_list.append(day)
 
     return date_list
 
@@ -35,6 +35,7 @@ class Charts:
         self.event_list = Event.objects.all()
         self.street_list = Street.objects.all()
         self.type_list = Type.objects.all()
+        self.main_type_list = MainType.objects.all()
         self.property_list = Property.objects.all()
         self.unit_list = DisposeUnit.objects.all()
         self.community_list = Community.objects.all()
@@ -44,6 +45,16 @@ class Charts:
         self.sunburst = self.sunburst_base()
         self.calendar = self.calendar_base()
         self.map = self.map_base()
+        # self.all()
+
+    def all(self):
+        start = datetime.datetime.now()
+        for event in self.event_list:
+            event.type = event.sub_type.main_type.type
+            event.save()
+
+        end = datetime.datetime.now()
+        print("all: " + str(end - start))
 
     def get_sunburst_data(self):
         sun_data = []
@@ -53,9 +64,10 @@ class Charts:
             for v in self.type_list:
                 type_value.update({v.name: 0})
 
-            for event in self.event_list:
-                if event.achieve == status:
-                    type_value[event.sub_type.main_type.type.name] += 1
+            events = status.event.get_queryset()
+
+            for event in events:
+                type_value[event.type.name] += 1
 
             time_list = []
             for key in type_value.keys():
@@ -71,6 +83,7 @@ class Charts:
         return sun_data
 
     def sunburst_base(self) -> Sunburst:
+        start = datetime.datetime.now()
         data = self.get_sunburst_data()
         c = (
             Sunburst()
@@ -78,46 +91,43 @@ class Charts:
             .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}"))
             .dump_options_with_quotes()
         )
+        end = datetime.datetime.now()
+        print("Sunburst: " + str(end-start))
         return c
 
     def get_word_data(self):
         words = []
-        units = []
-        properties = []
-        communities = []
-        sources = []
 
-        for unit in self.unit_list:
-            units.append((unit.name, unit.event.count()))
-        for pro in self.property_list:
-            properties.append((pro.name, pro.event.count()))
-        for community in self.community_list:
-            communities.append((community.name, community.event.count()))
-        for src in self.src_list:
-            sources.append((src.name, src.event.count()))
+        def append_data(data_list):
+            value_list = []
+            for data in data_list:
+                value_list.append((data.name, data.number))
 
-        def take_second(elem):
-            return elem[1]
+            def take_second(elem):
+                return elem[1]
 
-        units.sort(key=take_second)
-        properties.sort(key=take_second)
-        communities.sort(key=take_second)
-        sources.sort(key=take_second)
-        words.append(units[-1])
-        words.append(properties[-1])
-        words.append(communities[-1])
-        words.append(sources[-1])
+            value_list.sort(key=take_second)
+            words.append(value_list[-1])
+
+        append_data(self.unit_list)
+        append_data(self.property_list)
+        append_data(self.community_list)
+        append_data(self.src_list)
+        append_data(self.type_list)
+        append_data(self.main_type_list)
 
         return words
 
     def wordcloud_base(self) -> WordCloud:
+        start = datetime.datetime.now()
         words = self.get_word_data()
         c = (
             WordCloud()
-            .add("", words, word_size_range=[30, 80], shape=SymbolType.DIAMOND)
-            # .render()
+            .add("", words, word_size_range=[20, 80], shape=SymbolType.DIAMOND)
             .dump_options_with_quotes()
         )
+        end = datetime.datetime.now()
+        print("Wordcloud: " + str(end - start))
         return c
 
     def get_pie_data(self, name_list, value_list):
@@ -127,12 +137,12 @@ class Charts:
         return value_list
 
     def pie_base(self) -> Pie:
+        start = datetime.datetime.now()
         data = []
         data_value = []
         for pro in self.property_list:
             data.append(pro.name)
-            data_value.append(0)
-        data_value = self.get_pie_data(data, data_value)
+            data_value.append(pro.number)
 
         c = (
             Pie()
@@ -140,15 +150,22 @@ class Charts:
             .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
             .dump_options_with_quotes()
         )
+        end = datetime.datetime.now()
+        print("Pie: " + str(end - start))
         return c
 
-    def get_line_data(self, date_list, street, info):
+    def get_line_data(self, date_list, street_name, info):
+
         for event in self.event_list:
             event_time = event.create_time
-            if event.community.street.name != street:
+            if event_time < date_list[0]:
+                break
+
+            if event.community.street.name != street_name:
                 continue
+
             for value in date_list:
-                if value[2] == event_time.day and value[1] == event_time.month and value[0] == event_time.year:
+                if value == event_time:
                     info[event.property.name][date_list.index(value)] += 1
                     break
         return info
@@ -156,10 +173,13 @@ class Charts:
     def get_line_all(self, date_list, info):
         for event in self.event_list:
             event_time = event.create_time
+
+            if event_time < date_list[0]:
+                break
+
             for value in date_list:
-                if value[2] == event_time.day and value[1] == event_time.month and value[0] == event_time.year:
+                if value == event_time:
                     info[event.property.name][date_list.index(value)] += 1
-                    break
 
         return info
 
@@ -173,13 +193,9 @@ class Charts:
             info = self.get_line_data(date_list, street, info)
         else:
             info = self.get_line_all(date_list, info)
-        week_list = []
-        for value in date_list:
-            day = str(value[1]) + '-' + str(value[-1])
-            week_list.append(day)
         c = (
             Line()
-            .add_xaxis(week_list)
+            .add_xaxis(date_list)
         )
         for key in info.keys():
             c.add_yaxis(key, info[key], is_smooth=True)
@@ -199,29 +215,36 @@ class Charts:
         return c
 
     def get_line(self):
+        start = datetime.datetime.now()
         line_info = {
             "all": self.line_base()
         }
         for street in self.street_list:
             line = self.line_base(street=street.name)
             line_info.update({street.name: line})
-
+        end = datetime.datetime.now()
+        print("Line: " + str(end - start))
         return line_info
 
     def calendar_base(self) -> Calendar:
+        start = datetime.datetime.now()
+
         begin = get_date(365)
-        end = datetime.date.today()-timedelta(days=365)
-        max_num = 0
+        end = datetime.date.today()-timedelta(days=465)
         data = []
-        for i in range((end-begin).days+1):
-            cur_day = begin+timedelta(days=i)
-            count = 0
-            for event in self.event_list:
-                if event.create_time == cur_day:
-                    count += 1
-            data.append((cur_day, count))
-            if count > max_num:
-                max_num = count
+        cur_day = end
+        count = 0
+        for event in self.event_list:
+            if event.create_time < cur_day:
+                data.insert(0, (cur_day, count))
+                count = 0
+                cur_day -= timedelta(days=1)
+
+            if cur_day < begin:
+                break
+
+            if event.create_time == cur_day:
+                count += 1
 
         c = (
             Calendar()
@@ -241,9 +264,14 @@ class Charts:
             )
             .dump_options_with_quotes()
         )
+
+        end = datetime.datetime.now()
+        print("Calendar: " + str(end - start))
         return c
 
     def map_base(self) -> BMap:
+        start = datetime.datetime.now()
+
         location = []
 
         c = (
@@ -261,13 +289,14 @@ class Charts:
         )
 
         for community in self.community_list:
-            count = community.event.count()
-            if count:
+            if community.number:
                 c.add_coordinate(community.name, community.long, community.lat)
                 c.add(
                     "heat",
-                    [(community.name, count)],
+                    [(community.name, community.number)],
                     label_opts=opts.LabelOpts(formatter="{d}"),
                     color="red",
                 )
+        end = datetime.datetime.now()
+        print("Map: " + str(end - start))
         return c.dump_options_with_quotes()

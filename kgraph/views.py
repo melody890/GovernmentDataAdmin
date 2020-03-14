@@ -4,19 +4,34 @@ from django.contrib.auth.decorators import login_required
 from pyecharts.charts import Graph
 from pyecharts import options as opts
 
+from event.views import filter_model
+
 
 @login_required(login_url='/user/login/')
 def get_kgraph(request):
     search = request.GET.get('search')
-    kgraph = graph(search)
+    if search:
+        (model_name, model) = filter_model(search)
+        if model_name and model:
+            model_name = model_name.__name__
+            print(model_name)
+            print(str(model))
+            kgraph = graph(model_name, model)
+        else:
+            kgraph = ""
+            print("None")
+    else:
+        kgraph = ""
+
     context = {
         'graph': kgraph,
+        'kg_search': search
     }
     return render(request, 'kgraph/kgraph.html', context)
 
 
-def graph(search) -> Graph:
-    (categories, nodes, links) = get_data(search)
+def graph(model_name, model) -> Graph:
+    (categories, nodes, links) = get_data(model_name, model)
 
     c = (
         Graph(
@@ -27,11 +42,13 @@ def graph(search) -> Graph:
             nodes=nodes,
             links=links,
             categories=categories,
-            repulsion=100,
+            gravity=0.1,
+            repulsion=200,
             linestyle_opts=opts.LineStyleOpts(color="black", curve=0.2),
             label_opts=opts.LabelOpts(is_show=True, position='inside', font_size=20),
             is_draggable=True,
             is_rotate_label=True,
+            edge_length=200,
             edge_label=opts.LabelOpts(
                 is_show=True,
                 position="middle",
@@ -41,7 +58,7 @@ def graph(search) -> Graph:
         )
         .set_global_opts(
             legend_opts=opts.LegendOpts(is_show=True),
-            title_opts=opts.TitleOpts(title="知识图谱示例"),
+            title_opts=opts.TitleOpts(title=str(model)),
         )
         .dump_options_with_quotes()
     )
@@ -49,35 +66,19 @@ def graph(search) -> Graph:
     return c
 
 
-def get_data(search):
-
-    categories = [
-        opts.GraphCategory(name="Root"),
-        opts.GraphCategory(name="first"),
-        opts.GraphCategory(name="second"),
-    ]
-
-    nodes = [
-        opts.GraphNode(name="坪山街道", symbol_size=50, category=0),
-        opts.GraphNode(name="坪山区", symbol_size=40, category=1),
-        opts.GraphNode(name="200", symbol_size=40, category=1),
-        opts.GraphNode(name="诉求", symbol_size=40, category=1),
-        opts.GraphNode(name="社区", symbol_size=40, category=1),
-        opts.GraphNode(name="和平社区", symbol_size=30, category=2),
-        opts.GraphNode(name="坪山社区", symbol_size=30, category=2),
-        opts.GraphNode(name="六和社区", symbol_size=30, category=2),
-        opts.GraphNode(name="六联社区", symbol_size=30, category=2),
-    ]
-
-    links = [
-        opts.GraphLink(source="坪山街道", target="坪山区", value=50),
-        opts.GraphLink(source="坪山街道", target="200", value=50),
-        opts.GraphLink(source="坪山街道", target="诉求", value=50),
-        opts.GraphLink(source="坪山街道", target="社区", value=50),
-        opts.GraphLink(source="社区", target="和平社区", value=20),
-        opts.GraphLink(source="社区", target="坪山社区", value=20),
-        opts.GraphLink(source="社区", target="六和社区", value=20),
-        opts.GraphLink(source="社区", target="六联社区", value=20),
-    ]
+def get_data(model_name, model):
+    field_data = model._meta.fields
+    categories = [opts.GraphCategory(name=model_name)]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
+    links = []
+    for data in field_data:
+        name = data.attname
+        if name == 'name' or name == 'id':
+            continue
+        value = str(getattr(model, data.attname))
+        categories.append(opts.GraphCategory(name=name))
+        index = len(categories)-1
+        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+        links.append(opts.GraphLink(source=str(model), target=value, value=50))
 
     return categories, nodes, links

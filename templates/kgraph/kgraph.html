@@ -19,6 +19,25 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="white-box">
+                            <div style="width: 200px; align-self: center">
+                                <form role="search" method="GET" class="app-search hidden-sm hidden-xs m-r-10">
+                                    {% if kg_search %}
+                                        <input type="text" name="kgsearch" id="kgsearch_id" class="form-control" value="{{ kg_search }}" required>
+                                    {% else %}
+                                        <input type="text" name="kgsearch" id="kgsearch_id" placeholder="Search..." class="form-control" required>
+                                    {% endif %}
+                                    <a>
+                                        <i class="fa fa-search" onclick="kgsearch()"></i>
+                                        <script type="text/javascript" language="JavaScript">
+                                            function kgsearch() {
+                                                let searchBar = document.getElementById("kgsearch_id");
+                                                let toUrl = "http://" + self.location.host + "/kgraph?search=" + searchBar.value;
+                                                self.location.href = toUrl;
+                                            }
+                                        </script>
+                                    </a>
+                                </form>
+                            </div>
                             <div id="graph" class="chart-container" style="height: 800px;"></div>
                             <script>
                                 let graph_chart = echarts.init(

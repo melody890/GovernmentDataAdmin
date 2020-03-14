@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 class EventSource(models.Model):
     name = models.CharField(max_length=100)
     aID = models.CharField(max_length=100)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -16,6 +17,7 @@ class EventSource(models.Model):
 class Property(models.Model):
     name = models.CharField(max_length=100)
     aID = models.CharField(max_length=100)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -25,6 +27,7 @@ class Property(models.Model):
 class Type(models.Model):
     name = models.CharField(max_length=100)
     aID = models.CharField(max_length=100)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -39,6 +42,7 @@ class MainType(models.Model):
         on_delete=models.CASCADE,
         related_name='main_type',
     )
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -53,6 +57,7 @@ class SubType(models.Model):
         on_delete=models.CASCADE,
         related_name='sub_type',
     )
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -62,6 +67,7 @@ class SubType(models.Model):
 class District(models.Model):
     name = models.CharField(max_length=100)
     aID = models.CharField(max_length=100)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -76,6 +82,7 @@ class Street(models.Model):
         on_delete=models.CASCADE,
         related_name='street',
     )
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -87,6 +94,7 @@ class Community(models.Model):
     aID = models.CharField(max_length=100)
     long = models.FloatField(blank=True, default=0.0)
     lat = models.FloatField(blank=True, default=0.0)
+    number = models.PositiveIntegerField(default=0)
 
     street = models.ForeignKey(
         Street,
@@ -102,6 +110,7 @@ class Community(models.Model):
 class DisposeUnit(models.Model):
     name = models.CharField(max_length=100)
     aID = models.CharField(max_length=100)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -110,6 +119,7 @@ class DisposeUnit(models.Model):
 # 报告编号
 class ReportNumber(models.Model):
     num = models.PositiveIntegerField(default=1)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return str(self.num)
@@ -118,6 +128,7 @@ class ReportNumber(models.Model):
 # 执行编号
 class OperateNumber(models.Model):
     num = models.PositiveIntegerField(default=1)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return str(self.num)
@@ -136,6 +147,7 @@ class OccurPlace(models.Model):
 class Achieve(models.Model):
     status = models.CharField(max_length=100)
     name = models.CharField(max_length=100, blank=True)
+    number = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.status
@@ -194,6 +206,14 @@ class Event(models.Model):
         on_delete=models.CASCADE,
         related_name='event',
     )
+    # 事件类型
+    type = models.ForeignKey(
+        Type,
+        on_delete=models.CASCADE,
+        related_name='event',
+        blank=True,
+        default=1
+    )
     # 所属社区
     community = models.ForeignKey(
         Community,
@@ -206,6 +226,9 @@ class Event(models.Model):
         on_delete=models.CASCADE,
         related_name='event',
     )
+
+    class Meta:
+        ordering = ('-create_time', )
 
     def __str__(self):
         return str(self.rec_id) + "    " + str(self.create_time)
