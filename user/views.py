@@ -28,7 +28,7 @@ def user_login(request):
                 user = authenticate(username=data['username'], password=data['password'])
                 if user:
                     login(request, user)
-                    return redirect(to="index")
+                    return redirect(to="chart:charts")
                 else:
                     return HttpResponse("账号或密码输入有误。请重新输入。")
             else:

@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
 
 from pyecharts.charts import Graph
 from pyecharts import options as opts
 
 from event.views import filter_model
+from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit
 
 
 @login_required(login_url='/user/login/')
@@ -19,7 +21,6 @@ def get_kgraph(request):
             kgraph = graph(model_name, model)
         else:
             kgraph = ""
-            print("None")
     else:
         kgraph = ""
 
@@ -67,18 +68,533 @@ def graph(model_name, model) -> Graph:
 
 
 def get_data(model_name, model):
-    field_data = model._meta.fields
+    if model_name == "Property":
+        (categories, nodes, links) = get_property_data(model_name, model)
+    elif model_name == "EventSource":
+        (categories, nodes, links) = get_source_data(model_name, model)
+    elif model_name == "Achieve":
+        (categories, nodes, links) = get_achive_data(model_name, model)
+    elif model_name == "SubType":
+        (categories, nodes, links) = get_subtype_data(model_name, model)
+    elif model_name == "MainType":
+        (categories, nodes, links) = get_maintype_data(model)
+    elif model_name == "Type":
+        (categories, nodes, links) = get_type_data(model)
+    elif model_name == 'Community':
+        (categories, nodes, links) = get_community_data(model_name, model)
+    elif model_name == "Street":
+        (categories, nodes, links) = get_street_data(model_name, model)
+    elif model_name == "District":
+        (categories, nodes, links) = get_district_data(model_name, model)
+    elif model_name == 'DisposeUnit':
+        (categories, nodes, links) = get_disposeunit_data(model_name, model)
+    else:
+        (categories, nodes, links) = (None, None, None)
+
+    return categories, nodes, links
+
+
+def get_property_data(model_name, model):
+    events = model.event.get_queryset()
+    intime_number = 0
+    intime_to_number = 0
+    overtime_number = 0
+    community_list = {}
+    for event in events:
+        achieve = event.achieve.name
+        community = event.community.name
+        if community in community_list.keys():
+            community_list[community] += 1
+        else:
+            community_list.update({community: 1})
+        if achieve == "执行中":
+            intime_to_number += 1
+        elif achieve == '按期办结':
+            overtime_number += 1
+        elif achieve == "逾期办结":
+            intime_number += 1
+
+    number_max = 0
+    for key in community_list:
+        if community_list[key] > number_max:
+            community = key
+            number_max = community_list[key]
+
+    community_model = Community.objects.get(name=community)
+    street = community_model.street
+    district = street.district
+
+    categories = [
+        opts.GraphCategory(name="事件性质"),
+        opts.GraphCategory(name="事件数量"),
+        opts.GraphCategory(name="执行中"),
+        opts.GraphCategory(name="按期办结"),
+        opts.GraphCategory(name="逾期办结"),
+        opts.GraphCategory(name=str(model) + "下最多社区"),
+        opts.GraphCategory(name="对应街道"),
+        opts.GraphCategory(name="对应区域"),
+    ]
+    nodes = [
+        opts.GraphNode(name=str(model), symbol_size=80, category=0),
+        opts.GraphNode(name=str(model.number), symbol_size=50, category=1),
+        opts.GraphNode(name=str(intime_to_number), symbol_size=50, category=2),
+        opts.GraphNode(name=str(intime_number), symbol_size=50, category=3),
+        opts.GraphNode(name=str(overtime_number), symbol_size=50, category=4),
+        opts.GraphNode(name=community, symbol_size=50, category=5),
+        opts.GraphNode(name=street.name, symbol_size=40, category=6),
+        opts.GraphNode(name=district.name, symbol_size=30, category=7),
+    ]
+
+    links = [
+        opts.GraphLink(source=str(model), target=str(model.number), value=50),
+        opts.GraphLink(source=str(model), target=str(intime_to_number), value=50),
+        opts.GraphLink(source=str(model), target=str(intime_number), value=50),
+        opts.GraphLink(source=str(model), target=str(overtime_number), value=50),
+        opts.GraphLink(source=str(model), target=community, value=50),
+        opts.GraphLink(source=community, target=street.name, value=50),
+        opts.GraphLink(source=street.name, target=district.name, value=50),
+    ]
+
+    return categories, nodes, links
+
+
+def get_source_data(model_name, model):
+    events = model.event.get_queryset()
+    property_list = {}
+    for event in events:
+        proper = event.property.name
+        if proper in property_list.keys():
+            property_list[proper] += 1
+        else:
+            property_list.update({proper: 1})
+
+    ratio = '{:.2f}%'.format(model.number / Event.objects.count() * 100)
+    number_max = 0
+    for key in property_list:
+        if property_list[key] > number_max:
+            proper = key
+            number_max = property_list[key]
+
+    categories = [
+        opts.GraphCategory(name="事件来源"),
+        opts.GraphCategory(name="事件数量"),
+        opts.GraphCategory(name="事件性质"),
+        opts.GraphCategory(name="事件占比"),
+    ]
+    nodes = [
+        opts.GraphNode(name=str(model), symbol_size=80, category=0),
+        opts.GraphNode(name=str(model.number), symbol_size=50, category=1),
+        opts.GraphNode(name=proper, symbol_size=50, category=2),
+        opts.GraphNode(name=ratio, symbol_size=50, category=3),
+    ]
+
+    links = [
+        opts.GraphLink(source=str(model), target=str(model.number), value=50),
+        opts.GraphLink(source=str(model), target=proper, value=50),
+        opts.GraphLink(source=str(model), target=ratio, value=50),
+    ]
+
+    return categories, nodes, links
+
+
+def get_achive_data(model_name, model):
+    events = model.event.get_queryset()
+    ratio = '{:.2f}%'.format(model.number / Event.objects.count() * 100)
+    unit_list = {}
+
+    for event in events:
+        unit = event.dispose_unit.name
+        if unit in unit_list:
+            unit_list[unit] += 1
+        else:
+            unit_list.update({unit: 1})
+
+    number_max = 0
+    for key in unit_list:
+        if unit_list[key] > number_max:
+            unit = key
+            number_max = unit_list[key]
+
+    categories = [
+        opts.GraphCategory(name="处置状态"),
+        opts.GraphCategory(name="事件数量"),
+        opts.GraphCategory(name="最多 " + str(model.name) + " 处置机构"),
+        opts.GraphCategory(name="事件占比"),
+    ]
+
+    nodes = [
+        opts.GraphNode(name=str(model.name), symbol_size=80, category=0),
+        opts.GraphNode(name=str(model.number), symbol_size=50, category=1),
+        opts.GraphNode(name=unit, symbol_size=50, category=2),
+        opts.GraphNode(name=ratio, symbol_size=50, category=3),
+    ]
+
+    links = [
+        opts.GraphLink(source=str(model.name), target=str(model.number), value=50),
+        opts.GraphLink(source=str(model.name), target=unit, value=50),
+        opts.GraphLink(source=str(model.name), target=ratio, value=50),
+    ]
+    return categories, nodes, links
+
+
+def set_number_node(model, categories, nodes, links):
+    value = str(getattr(model, 'number'))
+    categories.append(opts.GraphCategory(name='事件总数'))
+    index = len(categories) - 1
+    nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+    links.append(opts.GraphLink(source=str(model), target=value, value='事件数'))
+
+    return 0
+
+
+def set_type_node(model_name, model, categories, nodes, links):
+    if model_name == 'SubType':
+        sub_model = model
+        model = model.main_type
+
+    thetype = model.type
+    name = '问题类型'
+    categories.append(opts.GraphCategory(name=name))
+    index = len(categories) - 1
+    value = str(thetype)
+    if (model_name == 'SubType' and value == str(sub_model)) or value == str(model):
+        value = value + '（问题类型）'
+    nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+    links.append(opts.GraphLink(source=str(model), target=value, value='上位类型'))
+
+    return 0
+
+
+def set_max_community_node(model_name, model, categories, nodes, links):
+    max_num = 0
+    communities = Community.objects.all()
+    if model_name == 'MainType':
+        subtypes = SubType.objects.filter(main_type=model)
+        for community in communities:
+            events = Event.objects.filter(sub_type__in=subtypes, community=community)
+            now_num = len(events)
+            if now_num > max_num:
+                max_num = now_num
+                max_community = community
+    if model_name == 'SubType':
+        for community in communities:
+            events = Event.objects.filter(sub_type=model, community=community)
+            now_num = len(events)
+            if now_num > max_num:
+                max_num = now_num
+                max_community = community
+    if model_name == 'Type':
+        maintypes = MainType.objects.filter(type=model)
+        subtypes = SubType.objects.filter(main_type__in=maintypes)
+        for community in communities:
+            events = Event.objects.filter(sub_type__in=subtypes, community=community)
+            now_num = len(events)
+            if now_num > max_num:
+                max_num = now_num
+                max_community = community
+    name = '街道'
+    categories.append(opts.GraphCategory(name=name))
+    index = len(categories) - 1
+    value = str(max_community)
+    nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+    links.append(opts.GraphLink(source=str(model), target=value, value='发生最多的街道'))
+
+    return 0
+
+
+def get_maintype_data(model):
+    categories = [opts.GraphCategory(name='问题大类')]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    links = []
+
+    set_number_node(model,categories,nodes,links)
+
+    set_type_node('MainType',model,categories,nodes,links)
+
+    set_max_community_node('MainType',model,categories,nodes,links)
+
+    subtypes = SubType.objects.filter(main_type=model)
+    name = '问题小类'
+    categories.append(opts.GraphCategory(name=name))
+    index = len(categories)-1
+    for subtype in subtypes:
+        value = str(subtype)
+        if value == str(model) or value == str(model.type):
+            value = value + '（问题小类）'
+        nodes.append(opts.GraphNode(name=value,symbol_size=50,category=index))
+        links.append(opts.GraphLink(source=str(model),target=value,value='下属小类'))
+
+    return categories, nodes, links
+
+
+def get_type_data(model):
+    categories = [opts.GraphCategory(name='问题类型')]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    links = []
+
+    set_number_node(model, categories, nodes, links)
+
+    set_max_community_node('Type', model, categories, nodes, links)
+
+    maintypes = MainType.objects.filter(type=model)
+    name = '问题大类'
+    categories.append(opts.GraphCategory(name=name))
+    index = len(categories) - 1
+    for maintype in maintypes:
+        value = str(maintype)
+        if value == str(model):
+            value = value + '（问题大类）'
+        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+        links.append(opts.GraphLink(source=str(model), target=value, value='下属大类'))
+
+    return categories, nodes, links
+
+
+def get_street_data(model_name, model):
     categories = [opts.GraphCategory(name=model_name)]
     nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
     links = []
-    for data in field_data:
-        name = data.attname
-        if name == 'name' or name == 'id':
+
+    districts = District.objects.all()
+    for district in districts:
+        name_c = District.name
+        if name_c == 'name' or name_c == 'id':
             continue
-        value = str(getattr(model, data.attname))
-        categories.append(opts.GraphCategory(name=name))
-        index = len(categories)-1
-        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
-        links.append(opts.GraphLink(source=str(model), target=value, value=50))
+        value_c = str(district)
+        categories.append(opts.GraphCategory(name='District'))
+        index_c = len(categories)-1
+        nodes.append(opts.GraphNode(name=value_c, symbol_size=60, category=index_c))
+        links.append(opts.GraphLink(source=value_c, target=str(model), value=100))
+
+    communities = Community.objects.filter(street=model)
+    for community in communities:
+        name_c = Community.name
+        if name_c == 'name' or name_c == 'id':
+            continue
+        value_c = str(community)
+        categories.append(opts.GraphCategory(name='Community'))
+        index_c = len(categories)-1
+        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c))
+        links.append(opts.GraphLink(source=str(model), target=value_c, value=20))
+
+    return categories, nodes, links
+
+
+def get_district_data(model_name, model):
+    categories = [opts.GraphCategory(name=model_name)]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
+    links = []
+
+    streets = Street.objects.filter(district=model)
+    for street in streets:
+        name_s = Street.name
+        if name_s == 'name' or name_s == 'id':
+            continue
+        value_s = str(street)
+        categories.append(opts.GraphCategory(name='Street'))
+        index_s = len(categories)-1
+        nodes.append(opts.GraphNode(name=value_s, symbol_size=60, category=index_s))
+        links.append(opts.GraphLink(source=str(model), target=value_s, value=100))
+
+    return categories, nodes, links
+
+
+def get_subtype_data(model_name, model):
+    categories = [opts.GraphCategory(name='问题小类')]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    links = []
+
+    id = SubType.objects.filter(name=str(model)).values("id")[0]['id']
+
+    try:
+        # 小类发生最多的社区名
+        coms = Event.objects.filter(sub_type_id=id).values('community').annotate(count=Count('community')).values(
+            'community', 'count').order_by('-count')
+        coms = list(coms)
+        com = coms[0]
+        com_name = Community.objects.get(id=com['community']).name
+        print(com_name)
+
+        node_name = com_name + ':' + str(com['count'])
+        cate_name = '社区名'
+        link_name = '小类发生最多社区'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        # 小类编号
+        sub_model = SubType.objects.filter(id=id)[0]
+        aid = sub_model.aID
+
+        node_name = str(aid)
+        cate_name = '编号'
+        link_name = '小类编号'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        # 小类所属大类
+        node_name = str(sub_model.main_type)
+        print(node_name)
+        cate_name = '大类名称'
+        link_name = '所属大类'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        # 小类事件总数
+        node_name = str(sub_model.number)
+        print(node_name)
+        cate_name = '事件总数'
+        link_name = '事件总数'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+    except:
+        print('error')
+
+    return categories, nodes, links
+
+
+def get_disposeunit_data(model_name,model):
+    categories = [opts.GraphCategory(name='执行部门')]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    links = []
+
+    id = DisposeUnit.objects.filter(name=str(model)).values("id")[0]['id']
+    dis_model = DisposeUnit.objects.filter(id=id)[0]
+
+    try:
+        # 事件总数
+        node_name = str(dis_model.number)
+        print(node_name)
+        cate_name = '事件总数'
+        link_name = '事件总数'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        # 完成事件百分比
+        is_achieve_count = Event.objects.filter(dispose_unit=id).values('achieve').annotate(count=Count('achieve')).values('achieve','count').order_by('-count')
+        is_achieve_count = list(is_achieve_count)
+        print(is_achieve_count)
+        y = is_achieve_count[0]['count']
+        n = is_achieve_count[1]['count']
+        percent = round(y *100/ (y + n), 2)
+
+        node_name = str((percent)) + '%'
+        cate_name = '完成事件百分比'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=50))
+
+        # 部门编号
+        aid = dis_model.aID
+
+        node_name = str(aid)
+        cate_name = '编号'
+        link_name = '部门编号'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+    except:
+        print('error')
+
+    return categories, nodes, links
+
+
+def get_community_data(model_name, model):
+    categories = [opts.GraphCategory(name='社区')]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    links = []
+
+    id = Community.objects.filter(name=str(model)).values("id")[0]['id']
+    com_model = Community.objects.filter(id=id)[0]
+
+    try:
+        # 编号
+        aid = com_model.aID
+        node_name = str(aid)
+        cate_name = '编号'
+        link_name = '社区编号'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        #事件最多大类
+        type_count = Event.objects.filter(community=id).values('type').annotate(count=Count('type')).values('type','count').order_by('-count')
+        type_count = list(type_count)
+
+        tid = type_count[0]['type']
+        t = Type.objects.filter(id=tid)[0]
+        c = type_count[0]['count']
+
+        node_name = str(t)+':'+str(c)
+        cate_name = '事件最多大类'
+        link_name = '事件最多大类'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=50))
+
+        # 社区所属街道
+        node_name = str(com_model.street)
+        print(node_name)
+        cate_name = '大类名称'
+        link_name = '所属大类'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        # 社区事件总数
+        node_name = str(com_model.number)
+        print(node_name)
+        cate_name = '事件总数'
+        link_name = '事件总数'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+
+        # 事件占街道百分比
+        strt = com_model.street
+
+        x = com_model.number
+        y = strt.number
+        Percentage =round(x*100/y, 2)
+
+        cate_name = '事件占街道百分比'
+        node_name = str(Percentage)+'%'
+        link_name = '事件占街道百分比'
+
+        categories.append(opts.GraphCategory(name=cate_name))
+        l = len(categories) - 1
+        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+        links.append(opts.GraphLink(source=str(model), target=node_name, value=50))
+
+    except:
+        print('error')
 
     return categories, nodes, links
