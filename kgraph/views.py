@@ -94,6 +94,18 @@ def get_data(model_name, model):
     return categories, nodes, links
 
 
+def create_node(source_node, categories, cate_name, nodes, node_name, links, link_name):
+    categories.append(opts.GraphCategory(cate_name))
+    print(cate_name)
+    l = len(categories) - 1
+    nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+    print(node_name)
+    links.append(opts.GraphLink(source=source_node, target=node_name, value=link_name))
+    print(link_name)
+
+    return 0
+
+
 def get_property_data(model_name, model):
     events = model.event.get_queryset()
     intime_number = 0
@@ -418,11 +430,9 @@ def get_subtype_data(model_name, model):
         node_name = com_name + ':' + str(com['count'])
         cate_name = '社区名'
         link_name = '小类发生最多社区'
+        source_node = str(model)
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 小类编号
         sub_model = SubType.objects.filter(id=id)[0]
@@ -431,36 +441,30 @@ def get_subtype_data(model_name, model):
         node_name = str(aid)
         cate_name = '编号'
         link_name = '小类编号'
+        source_node = str(model)
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 小类所属大类
         node_name = str(sub_model.main_type)
         print(node_name)
         cate_name = '大类名称'
         link_name = '所属大类'
+        source_node = str(model)
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 小类事件总数
         node_name = str(sub_model.number)
         print(node_name)
         cate_name = '事件总数'
         link_name = '事件总数'
+        source_node = str(model)
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
-    except:
-        print('error')
+    except Exception as e:
+        print(e)
 
     return categories, nodes, links
 
@@ -479,11 +483,9 @@ def get_disposeunit_data(model_name,model):
         print(node_name)
         cate_name = '事件总数'
         link_name = '事件总数'
+        source_node = str(dis_model)
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 完成事件百分比
         is_achieve_count = Event.objects.filter(dispose_unit=id).values('achieve').annotate(count=Count('achieve')).values('achieve','count').order_by('-count')
@@ -495,11 +497,9 @@ def get_disposeunit_data(model_name,model):
 
         node_name = str((percent)) + '%'
         cate_name = '完成事件百分比'
+        link_name = '完成事件百分比'
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=50))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 部门编号
         aid = dis_model.aID
@@ -508,13 +508,10 @@ def get_disposeunit_data(model_name,model):
         cate_name = '编号'
         link_name = '部门编号'
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
-    except:
-        print('error')
+    except Exception as e:
+        print(e)
 
     return categories, nodes, links
 
@@ -533,11 +530,9 @@ def get_community_data(model_name, model):
         node_name = str(aid)
         cate_name = '编号'
         link_name = '社区编号'
+        source_node = str(com_model)
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         #事件最多大类
         type_count = Event.objects.filter(community=id).values('type').annotate(count=Count('type')).values('type','count').order_by('-count')
@@ -551,10 +546,7 @@ def get_community_data(model_name, model):
         cate_name = '事件最多大类'
         link_name = '事件最多大类'
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=50))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 社区所属街道
         node_name = str(com_model.street)
@@ -562,10 +554,7 @@ def get_community_data(model_name, model):
         cate_name = '大类名称'
         link_name = '所属大类'
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 社区事件总数
         node_name = str(com_model.number)
@@ -573,28 +562,21 @@ def get_community_data(model_name, model):
         cate_name = '事件总数'
         link_name = '事件总数'
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=link_name))
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 事件占街道百分比
         strt = com_model.street
 
         x = com_model.number
         y = strt.number
-        Percentage =round(x*100/y, 2)
+        Percentage =round(x*100/y,2)
 
         cate_name = '事件占街道百分比'
         node_name = str(Percentage)+'%'
         link_name = '事件占街道百分比'
 
-        categories.append(opts.GraphCategory(name=cate_name))
-        l = len(categories) - 1
-        nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
-        links.append(opts.GraphLink(source=str(model), target=node_name, value=50))
-
-    except:
-        print('error')
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+    except Exception as e:
+        print(e)
 
     return categories, nodes, links
