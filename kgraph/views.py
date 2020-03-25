@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 
 from pyecharts.charts import Graph
+from pyecharts.charts import WordCloud
 from pyecharts import options as opts
 
 from event.views import filter_model
@@ -20,9 +21,9 @@ def get_kgraph(request):
             print(str(model))
             kgraph = graph(model_name, model)
         else:
-            kgraph = ""
+            kgraph = wordcloud("SubType")
     else:
-        kgraph = ""
+        kgraph = wordcloud("SubType")
 
     context = {
         'graph': kgraph,
@@ -43,19 +44,22 @@ def graph(model_name, model) -> Graph:
             nodes=nodes,
             links=links,
             categories=categories,
-            gravity=0.1,
-            repulsion=200,
+            gravity=0.01,
+            repulsion=300,
             linestyle_opts=opts.LineStyleOpts(color="black", curve=0.2),
             label_opts=opts.LabelOpts(is_show=True, position='inside', font_size=20),
             is_draggable=True,
             is_rotate_label=True,
+            is_focusnode=True,
+            layout="force",
             edge_length=200,
             edge_label=opts.LabelOpts(
                 is_show=True,
                 position="middle",
                 font_size=15,
-                formatter="{b}"
-            )
+                formatter="{c}"
+            ),
+            edge_symbol=[None,'arrow']
         )
         .set_global_opts(
             legend_opts=opts.LegendOpts(is_show=True),
@@ -139,32 +143,31 @@ def get_property_data(model_name, model):
     categories = [
         opts.GraphCategory(name="事件性质"),
         opts.GraphCategory(name="事件数量"),
-        opts.GraphCategory(name="执行中"),
-        opts.GraphCategory(name="按期办结"),
-        opts.GraphCategory(name="逾期办结"),
-        opts.GraphCategory(name=str(model) + "下最多社区"),
-        opts.GraphCategory(name="对应街道"),
-        opts.GraphCategory(name="对应区域"),
+        opts.GraphCategory(name="百分比"),
+        opts.GraphCategory(name="百分比"),
+        # opts.GraphCategory(name="逾期办结"),
+        opts.GraphCategory(name="社区"),
+        opts.GraphCategory(name="街道"),
+        opts.GraphCategory(name="区域"),
     ]
     nodes = [
         opts.GraphNode(name=str(model), symbol_size=80, category=0),
         opts.GraphNode(name=str(model.number), symbol_size=50, category=1),
-        opts.GraphNode(name=str(intime_to_number), symbol_size=50, category=2),
-        opts.GraphNode(name=str(intime_number), symbol_size=50, category=3),
-        opts.GraphNode(name=str(overtime_number), symbol_size=50, category=4),
+        opts.GraphNode(name=str((round(intime_to_number*100/model.number,2)))+'%', symbol_size=50, category=2),
+        opts.GraphNode(name=str((round(intime_number*100/model.number,2)))+'%', symbol_size=50, category=3),
+        # opts.GraphNode(name=str(overtime_number), symbol_size=50, category=4),
         opts.GraphNode(name=community, symbol_size=50, category=5),
         opts.GraphNode(name=street.name, symbol_size=40, category=6),
         opts.GraphNode(name=district.name, symbol_size=30, category=7),
     ]
-
     links = [
-        opts.GraphLink(source=str(model), target=str(model.number), value=50),
-        opts.GraphLink(source=str(model), target=str(intime_to_number), value=50),
-        opts.GraphLink(source=str(model), target=str(intime_number), value=50),
-        opts.GraphLink(source=str(model), target=str(overtime_number), value=50),
-        opts.GraphLink(source=str(model), target=community, value=50),
-        opts.GraphLink(source=community, target=street.name, value=50),
-        opts.GraphLink(source=street.name, target=district.name, value=50),
+        opts.GraphLink(source=str(model), target=str(model.number), value='事件总数'),
+        opts.GraphLink(source=str(model), target=str((round(intime_to_number*100/model.number, 2)))+'%', value='执行中事件百分比'),
+        opts.GraphLink(source=str(model), target=str((round(intime_number*100/model.number, 2)))+'%', value='按期办结百分比'),
+        # opts.GraphLink(source=str(model), target=str(overtime_number), value=50),
+        opts.GraphLink(source=str(model), target=community, value=str(model) + "下最多社区"),
+        opts.GraphLink(source=community, target=street.name, value="对应街道"),
+        opts.GraphLink(source=street.name, target=district.name, value="对应区域"),
     ]
 
     return categories, nodes, links
@@ -188,10 +191,10 @@ def get_source_data(model_name, model):
             number_max = property_list[key]
 
     categories = [
-        opts.GraphCategory(name="事件来源"),
-        opts.GraphCategory(name="事件数量"),
-        opts.GraphCategory(name="事件性质"),
-        opts.GraphCategory(name="事件占比"),
+        opts.GraphCategory(name="来源"),
+        opts.GraphCategory(name="数量"),
+        opts.GraphCategory(name="性质"),
+        opts.GraphCategory(name="百分比"),
     ]
     nodes = [
         opts.GraphNode(name=str(model), symbol_size=80, category=0),
@@ -201,9 +204,9 @@ def get_source_data(model_name, model):
     ]
 
     links = [
-        opts.GraphLink(source=str(model), target=str(model.number), value=50),
-        opts.GraphLink(source=str(model), target=proper, value=50),
-        opts.GraphLink(source=str(model), target=ratio, value=50),
+        opts.GraphLink(source=str(model), target=str(model.number), value="事件总数量"),
+        opts.GraphLink(source=str(model), target=proper, value="对应性质"),
+        opts.GraphLink(source=str(model), target=ratio, value="占事件总数百分比"),
     ]
 
     return categories, nodes, links
@@ -228,10 +231,10 @@ def get_achive_data(model_name, model):
             number_max = unit_list[key]
 
     categories = [
-        opts.GraphCategory(name="处置状态"),
-        opts.GraphCategory(name="事件数量"),
-        opts.GraphCategory(name="最多 " + str(model.name) + " 处置机构"),
-        opts.GraphCategory(name="事件占比"),
+        opts.GraphCategory(name="执行情况"),
+        opts.GraphCategory(name="数量"),
+        opts.GraphCategory(name="处置部门"),
+        opts.GraphCategory(name="百分比"),
     ]
 
     nodes = [
@@ -243,18 +246,18 @@ def get_achive_data(model_name, model):
 
     links = [
         opts.GraphLink(source=str(model.name), target=str(model.number), value=50),
-        opts.GraphLink(source=str(model.name), target=unit, value=50),
-        opts.GraphLink(source=str(model.name), target=ratio, value=50),
+        opts.GraphLink(source=str(model.name), target=unit, value="最多 " + str(model.name) + " 处置机构"),
+        opts.GraphLink(source=str(model.name), target=ratio, value="事件占比"),
     ]
     return categories, nodes, links
 
 
 def set_number_node(model, categories, nodes, links):
     value = str(getattr(model, 'number'))
-    categories.append(opts.GraphCategory(name='事件总数'))
+    categories.append(opts.GraphCategory(name='数量'))
     index = len(categories) - 1
     nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
-    links.append(opts.GraphLink(source=str(model), target=value, value='事件数'))
+    links.append(opts.GraphLink(source=str(model), target=value, value='事件总数量'))
 
     return 0
 
@@ -265,14 +268,14 @@ def set_type_node(model_name, model, categories, nodes, links):
         model = model.main_type
 
     thetype = model.type
-    name = '问题类型'
+    name = '类型'
     categories.append(opts.GraphCategory(name=name))
     index = len(categories) - 1
     value = str(thetype)
     if (model_name == 'SubType' and value == str(sub_model)) or value == str(model):
         value = value + '（问题类型）'
     nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
-    links.append(opts.GraphLink(source=str(model), target=value, value='上位类型'))
+    links.append(opts.GraphLink(source=str(model), target=value, value='类型'))
 
     return 0
 
@@ -315,7 +318,7 @@ def set_max_community_node(model_name, model, categories, nodes, links):
 
 
 def get_maintype_data(model):
-    categories = [opts.GraphCategory(name='问题大类')]
+    categories = [opts.GraphCategory(name='大类')]
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
     links = []
 
@@ -326,7 +329,7 @@ def get_maintype_data(model):
     set_max_community_node('MainType',model,categories,nodes,links)
 
     subtypes = SubType.objects.filter(main_type=model)
-    name = '问题小类'
+    name = '小类'
     categories.append(opts.GraphCategory(name=name))
     index = len(categories)-1
     for subtype in subtypes:
@@ -340,7 +343,7 @@ def get_maintype_data(model):
 
 
 def get_type_data(model):
-    categories = [opts.GraphCategory(name='问题类型')]
+    categories = [opts.GraphCategory(name='类型')]
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
     links = []
 
@@ -349,7 +352,7 @@ def get_type_data(model):
     set_max_community_node('Type', model, categories, nodes, links)
 
     maintypes = MainType.objects.filter(type=model)
-    name = '问题大类'
+    name = '大类'
     categories.append(opts.GraphCategory(name=name))
     index = len(categories) - 1
     for maintype in maintypes:
@@ -359,11 +362,13 @@ def get_type_data(model):
         nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
         links.append(opts.GraphLink(source=str(model), target=value, value='下属大类'))
 
+
+
     return categories, nodes, links
 
 
 def get_street_data(model_name, model):
-    categories = [opts.GraphCategory(name=model_name)]
+    categories = [opts.GraphCategory(name='街道')]
     nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
     links = []
 
@@ -373,10 +378,10 @@ def get_street_data(model_name, model):
         if name_c == 'name' or name_c == 'id':
             continue
         value_c = str(district)
-        categories.append(opts.GraphCategory(name='District'))
+        categories.append(opts.GraphCategory(name='区域'))
         index_c = len(categories)-1
         nodes.append(opts.GraphNode(name=value_c, symbol_size=60, category=index_c))
-        links.append(opts.GraphLink(source=value_c, target=str(model), value=100))
+        links.append(opts.GraphLink(source=value_c, target=str(model), value='所属区域'))
 
     communities = Community.objects.filter(street=model)
     for community in communities:
@@ -384,16 +389,16 @@ def get_street_data(model_name, model):
         if name_c == 'name' or name_c == 'id':
             continue
         value_c = str(community)
-        categories.append(opts.GraphCategory(name='Community'))
+        categories.append(opts.GraphCategory(name='社区'))
         index_c = len(categories)-1
-        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c))
-        links.append(opts.GraphLink(source=str(model), target=value_c, value=20))
+        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category='社区'))
+        links.append(opts.GraphLink(source=str(model), target=value_c, value='下属社区'))
 
     return categories, nodes, links
 
 
 def get_district_data(model_name, model):
-    categories = [opts.GraphCategory(name=model_name)]
+    categories = [opts.GraphCategory(name='区域')]
     nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
     links = []
 
@@ -403,22 +408,31 @@ def get_district_data(model_name, model):
         if name_s == 'name' or name_s == 'id':
             continue
         value_s = str(street)
-        categories.append(opts.GraphCategory(name='Street'))
+        categories.append(opts.GraphCategory(name='街道'))
         index_s = len(categories)-1
         nodes.append(opts.GraphNode(name=value_s, symbol_size=60, category=index_s))
-        links.append(opts.GraphLink(source=str(model), target=value_s, value=100))
+        links.append(opts.GraphLink(source=str(model), target=value_s, value='下属街道'))
 
     return categories, nodes, links
 
 
 def get_subtype_data(model_name, model):
-    categories = [opts.GraphCategory(name='问题小类')]
+    categories = [opts.GraphCategory(name='小类')]
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
     links = []
 
     id = SubType.objects.filter(name=str(model)).values("id")[0]['id']
 
     try:
+        # 小类所属大类
+        node_name = str(sub_model.main_type)
+        print(node_name)
+        cate_name = '大类'
+        link_name = '所属大类'
+        source_node = str(model)
+
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+
         # 小类发生最多的社区名
         coms = Event.objects.filter(sub_type_id=id).values('community').annotate(count=Count('community')).values(
             'community', 'count').order_by('-count')
@@ -428,7 +442,7 @@ def get_subtype_data(model_name, model):
         print(com_name)
 
         node_name = com_name + ':' + str(com['count'])
-        cate_name = '社区名'
+        cate_name = '社区'
         link_name = '小类发生最多社区'
         source_node = str(model)
 
@@ -445,19 +459,10 @@ def get_subtype_data(model_name, model):
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
-        # 小类所属大类
-        node_name = str(sub_model.main_type)
-        print(node_name)
-        cate_name = '大类名称'
-        link_name = '所属大类'
-        source_node = str(model)
-
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
-
         # 小类事件总数
         node_name = str(sub_model.number)
         print(node_name)
-        cate_name = '事件总数'
+        cate_name = '数量'
         link_name = '事件总数'
         source_node = str(model)
 
@@ -481,7 +486,7 @@ def get_disposeunit_data(model_name,model):
         # 事件总数
         node_name = str(dis_model.number)
         print(node_name)
-        cate_name = '事件总数'
+        cate_name = '数量'
         link_name = '事件总数'
         source_node = str(dis_model)
 
@@ -496,7 +501,7 @@ def get_disposeunit_data(model_name,model):
         percent = round(y *100/ (y + n), 2)
 
         node_name = str((percent)) + '%'
-        cate_name = '完成事件百分比'
+        cate_name = '百分比'
         link_name = '完成事件百分比'
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
@@ -525,6 +530,14 @@ def get_community_data(model_name, model):
     com_model = Community.objects.filter(id=id)[0]
 
     try:
+        # 社区所属街道
+        node_name = str(com_model.street)
+        print(node_name)
+        cate_name = '大类'
+        link_name = '所属大类'
+
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+
         # 编号
         aid = com_model.aID
         node_name = str(aid)
@@ -543,23 +556,16 @@ def get_community_data(model_name, model):
         c = type_count[0]['count']
 
         node_name = str(t)+':'+str(c)
-        cate_name = '事件最多大类'
+        cate_name = '大类'
         link_name = '事件最多大类'
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
-        # 社区所属街道
-        node_name = str(com_model.street)
-        print(node_name)
-        cate_name = '大类名称'
-        link_name = '所属大类'
-
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
         # 社区事件总数
         node_name = str(com_model.number)
         print(node_name)
-        cate_name = '事件总数'
+        cate_name = '数量'
         link_name = '事件总数'
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
@@ -569,9 +575,9 @@ def get_community_data(model_name, model):
 
         x = com_model.number
         y = strt.number
-        Percentage =round(x*100/y,2)
+        Percentage = round(x*100/y,2)
 
-        cate_name = '事件占街道百分比'
+        cate_name = '百分比'
         node_name = str(Percentage)+'%'
         link_name = '事件占街道百分比'
 
@@ -580,3 +586,29 @@ def get_community_data(model_name, model):
         print(e)
 
     return categories, nodes, links
+
+
+def wordcloud(model_name):
+    if model_name == "SubType":
+        models = SubType.objects.all()
+        data = []
+        for subtype in models:
+            data.append((str(subtype.name),str(subtype.number)))
+        print(data)
+
+    # print('wordcloud')
+
+    c = (
+        WordCloud()
+            .add(series_name= model_name+" Wordcloud", data_pair=data, word_size_range=[6, 66])
+            .set_global_opts(
+            title_opts=opts.TitleOpts(
+                title="热点分析", title_textstyle_opts=opts.TextStyleOpts(font_size=23)
+            ),
+            tooltip_opts=opts.TooltipOpts(is_show=True),
+        )
+            .dump_options_with_quotes()
+            # .render("basic_wordcloud.html")
+    )
+    print('yes')
+    return c
