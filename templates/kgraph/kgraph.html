@@ -39,11 +39,15 @@
                                 </form>
                             </div>
                             <div id="graph" class="chart-container" style="height: 800px;"></div>
-                            <script>
+                            <script type="text/javascript"  language="JavaScript">
                                 let graph_chart = echarts.init(
                                     document.getElementById('graph'), 'white', {renderer: 'svg'}
                                 );
                                 graph_chart.setOption({{ graph | safe}});
+                                graph_chart.on('click',function(params){
+                                    let toUrl="http://"+self.location.host+"/kgraph?search="+params.name;
+                                    self.location.href=toUrl;
+                                });
                             </script>
                         </div>
                     </div>
