@@ -39,14 +39,70 @@
                                 </form>
                             </div>
                             <div id="graph" class="chart-container" style="height: 800px;"></div>
+                            <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.9.0/jquery.min.js"></script>
+
                             <script type="text/javascript"  language="JavaScript">
                                 let graph_chart = echarts.init(
                                     document.getElementById('graph'), 'white', {renderer: 'svg'}
                                 );
                                 graph_chart.setOption({{ graph | safe}});
                                 graph_chart.on('click',function(params){
-                                    let toUrl="http://"+self.location.host+"/kgraph?search="+params.name;
-                                    self.location.href=toUrl;
+                                    if (params.seriesType =='wordCloud'){
+                                        let toUrl="http://"+self.location.host+"/kgraph?search="+params.name;
+                                        self.location.href=toUrl;
+                                    }
+                                    else{
+                                        var option = graph_chart.getOption();
+                                        var nodesoption = option.series[0].data;
+                                        var linksoption = option.series[0].links;
+                                        var categoriesoption = option.series[0].categories;
+                                        var name = params.name;
+
+                                        $.ajax({
+                                            url:'http://'+self.location.host+'/kgraph/add/',
+                                            type:'GET',
+                                            data:{'uname':params.name},
+                                            success:function(result){
+                                                var jagraph = JSON.parse(result.graph);
+                                                var newnodes = jagraph.series[0].data;
+                                                var newlinks = jagraph.series[0].links;
+                                                var newcategories = jagraph.series[0].categories;
+
+                                                for(var i = 0; i <newlinks.length; i++){
+                                                    linksoption.push(newlinks[i]);
+                                                }
+                                                var catenum = categoriesoption.length
+                                                for(var i = 0; i <newcategories.length; i++){
+                                                    categoriesoption.push(newcategories[i]);
+                                                }
+                                                for(var i = 0; i <newnodes.length; i++){
+                                                    befcate = newnodes[i].category
+                                                    newnodes[i].category = befcate+catenum;
+                                                }
+                                                function addnew(arr1,arr2) {
+                                                    for (var i = 0; i < arr1.length; i++) {
+                                                        for (var j = 0; j < arr2.length; j++) {
+                                                            if (arr1[i].name === arr2[j].name) {
+                                                                arr1.splice(i, 1);
+                                                            }
+                                                        }
+                                                    }
+                                                    for (var i = 0; i < arr2.length; i++) {
+                                                        arr1.push(arr2[i]);
+                                                    }
+                                                }
+                                                nodesoption = addnew(nodesoption,newnodes)
+                                                var lgdata = option.legend[0].data
+                                                var newlgdata = jagraph.legend[0].data
+                                                var lgsel = option.legend[0].selected
+                                                var newlgsel = jagraph.legend[0].selected
+                                                for(var i = 0; i <newlgdata.length; i++){
+                                                    lgdata.push(newlgdata[i]);
+                                                }
+                                                graph_chart.setOption(option);
+                                            },
+                                        });
+                                    }
                                 });
                             </script>
                         </div>

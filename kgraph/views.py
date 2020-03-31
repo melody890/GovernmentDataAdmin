@@ -1,6 +1,9 @@
+import json
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
+from django.http import JsonResponse
 
 from pyecharts.charts import Graph
 from pyecharts.charts import WordCloud
@@ -8,6 +11,8 @@ from pyecharts import options as opts
 
 from event.views import filter_model
 from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit
+
+import random
 
 
 @login_required(login_url='/user/login/')
@@ -21,15 +26,39 @@ def get_kgraph(request):
             print(str(model))
             kgraph = graph(model_name, model)
         else:
-            kgraph = wordcloud("SubType")
+            kgraph = wordcloud()
     else:
-        kgraph = wordcloud("SubType")
+        kgraph = wordcloud()
 
     context = {
         'graph': kgraph,
         'kg_search': search
     }
     return render(request, 'kgraph/kgraph.html', context)
+
+
+def get_ajax(request):
+    uname = request.GET.get('uname')
+    print(uname)
+    if uname:
+        (model_name, model) = filter_model(uname)
+        if model_name and model:
+            model_name = model_name.__name__
+            print(model_name)
+            print(str(model))
+            kgraph = graph(model_name, model)
+        else:
+            kgraph = ''
+    else:
+        kgraph = ''
+
+    context = {
+        "graph": kgraph
+    }
+
+    print(context)
+
+    return JsonResponse(context)
 
 
 def graph(model_name, model) -> Graph:
@@ -422,6 +451,7 @@ def get_subtype_data(model_name, model):
     links = []
 
     id = SubType.objects.filter(name=str(model)).values("id")[0]['id']
+    sub_model = SubType.objects.filter(id=id)[0]
 
     try:
         # 小类所属大类
@@ -533,8 +563,9 @@ def get_community_data(model_name, model):
         # 社区所属街道
         node_name = str(com_model.street)
         print(node_name)
-        cate_name = '大类'
-        link_name = '所属大类'
+        cate_name = '街道'
+        link_name = '所属街道'
+        source_node = str(com_model)
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
@@ -543,7 +574,7 @@ def get_community_data(model_name, model):
         node_name = str(aid)
         cate_name = '编号'
         link_name = '社区编号'
-        source_node = str(com_model)
+
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
@@ -588,22 +619,30 @@ def get_community_data(model_name, model):
     return categories, nodes, links
 
 
-def wordcloud(model_name):
-    if model_name == "SubType":
-        models = SubType.objects.all()
-        data = []
-        for subtype in models:
-            data.append((str(subtype.name),str(subtype.number)))
-        print(data)
+def wordcloud():
+    data = []
+    f = random.randint(0, 10)
+    t = random.randint(20, 30)
+    type_models = list(SubType.objects.order_by('?')[f:t])
+    main_models = list(MainType.objects.order_by('?')[f:t])
+    sub_models = list(SubType.objects.order_by('?')[f:t])
+    dis_models = list(District.objects.order_by('?')[f:t])
+    str_models = list(Street.objects.order_by('?')[f:t])
+    com_models = list(Community.objects.order_by('?')[f:t])
 
-    # print('wordcloud')
+    models = type_models + main_models + sub_models + dis_models + com_models + str_models
+
+    for model in models:
+        data.append((str(model.name),str(model.number)))
+
+    print(data)
 
     c = (
         WordCloud()
-            .add(series_name= model_name+" Wordcloud", data_pair=data, word_size_range=[6, 66])
+            .add(series_name= "wordcloud", data_pair=data, word_size_range=[20, 200])
             .set_global_opts(
             title_opts=opts.TitleOpts(
-                title="热点分析", title_textstyle_opts=opts.TextStyleOpts(font_size=23)
+                title='wordcloud', title_textstyle_opts=opts.TextStyleOpts(font_size=23)
             ),
             tooltip_opts=opts.TooltipOpts(is_show=True),
         )
