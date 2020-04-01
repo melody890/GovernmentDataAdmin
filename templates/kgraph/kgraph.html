@@ -43,7 +43,7 @@
 
                             <script type="text/javascript"  language="JavaScript">
                                 let graph_chart = echarts.init(
-                                    document.getElementById('graph'), 'white', {renderer: 'svg'}
+                                    document.getElementById('graph'), 'white', {renderer: 'canvas'}
                                 );
                                 graph_chart.setOption({{ graph | safe}});
                                 graph_chart.on('click',function(params){
@@ -51,53 +51,53 @@
                                         let toUrl="http://"+self.location.host+"/kgraph?search="+params.name;
                                         self.location.href=toUrl;
                                     }
-                                    else{
-                                        var option = graph_chart.getOption();
-                                        var nodesoption = option.series[0].data;
-                                        var linksoption = option.series[0].links;
-                                        var categoriesoption = option.series[0].categories;
-                                        var name = params.name;
+                                    else {
+                                        let option = graph_chart.getOption();
+                                        let nodesOption = option.series[0].data;
+                                        let linksOption = option.series[0].links;
+                                        let categoriesOption = option.series[0].categories;
+                                        let name = params.name;
 
                                         $.ajax({
                                             url:'http://'+self.location.host+'/kgraph/add/',
                                             type:'GET',
                                             data:{'uname':params.name},
                                             success:function(result){
-                                                var jagraph = JSON.parse(result.graph);
-                                                var newnodes = jagraph.series[0].data;
-                                                var newlinks = jagraph.series[0].links;
-                                                var newcategories = jagraph.series[0].categories;
+                                                let jaGraph = JSON.parse(result.graph);
+                                                let newNodes = jaGraph.series[0].data;
+                                                let newLinks = jaGraph.series[0].links;
+                                                let newCategories = jaGraph.series[0].categories;
 
-                                                for(var i = 0; i <newlinks.length; i++){
-                                                    linksoption.push(newlinks[i]);
+                                                for(let i = 0; i <newLinks.length; i++){
+                                                    linksOption.push(newLinks[i]);
                                                 }
-                                                var catenum = categoriesoption.length
-                                                for(var i = 0; i <newcategories.length; i++){
-                                                    categoriesoption.push(newcategories[i]);
+                                                let cateNum = categoriesOption.length;
+                                                for(let i = 0; i <newCategories.length; i++){
+                                                    categoriesOption.push(newCategories[i]);
                                                 }
-                                                for(var i = 0; i <newnodes.length; i++){
-                                                    befcate = newnodes[i].category
-                                                    newnodes[i].category = befcate+catenum;
+                                                for(let i = 0; i <newNodes.length; i++){
+                                                    let befCate = newNodes[i].category;
+                                                    newNodes[i].category = befCate+cateNum;
                                                 }
-                                                function addnew(arr1,arr2) {
-                                                    for (var i = 0; i < arr1.length; i++) {
-                                                        for (var j = 0; j < arr2.length; j++) {
+                                                function addNew(arr1,arr2) {
+                                                    for (let i = 0; i < arr1.length; i++) {
+                                                        for (let j = 0; j < arr2.length; j++) {
                                                             if (arr1[i].name === arr2[j].name) {
-                                                                arr1.splice(i, 1);
+                                                                arr2.splice(j, 1);
                                                             }
                                                         }
                                                     }
-                                                    for (var i = 0; i < arr2.length; i++) {
+                                                    for (let i = 0; i < arr2.length; i++) {
                                                         arr1.push(arr2[i]);
                                                     }
                                                 }
-                                                nodesoption = addnew(nodesoption,newnodes)
-                                                var lgdata = option.legend[0].data
-                                                var newlgdata = jagraph.legend[0].data
-                                                var lgsel = option.legend[0].selected
-                                                var newlgsel = jagraph.legend[0].selected
-                                                for(var i = 0; i <newlgdata.length; i++){
-                                                    lgdata.push(newlgdata[i]);
+                                                nodesOption = addNew(nodesOption,newNodes);
+                                                let lgData = option.legend[0].data;
+                                                let newLgData = jaGraph.legend[0].data;
+                                                let lgSel = option.legend[0].selected;
+                                                let newLgSel = jaGraph.legend[0].selected;
+                                                for(let i = 0; i <newLgData.length; i++){
+                                                    lgData.push(newLgData[i]);
                                                 }
                                                 graph_chart.setOption(option);
                                             },

@@ -55,7 +55,6 @@ def get_ajax(request):
     context = {
         "graph": kgraph
     }
-
     print(context)
 
     return JsonResponse(context)
@@ -391,8 +390,6 @@ def get_type_data(model):
         nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
         links.append(opts.GraphLink(source=str(model), target=value, value='下属大类'))
 
-
-
     return categories, nodes, links
 
 
@@ -410,7 +407,7 @@ def get_street_data(model_name, model):
         categories.append(opts.GraphCategory(name='区域'))
         index_c = len(categories)-1
         nodes.append(opts.GraphNode(name=value_c, symbol_size=60, category=index_c))
-        links.append(opts.GraphLink(source=value_c, target=str(model), value='所属区域'))
+        links.append(opts.GraphLink(source=str(model), target=value_c, value='所属区域'))
 
     communities = Community.objects.filter(street=model)
     for community in communities:
@@ -420,7 +417,7 @@ def get_street_data(model_name, model):
         value_c = str(community)
         categories.append(opts.GraphCategory(name='社区'))
         index_c = len(categories)-1
-        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category='社区'))
+        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c))
         links.append(opts.GraphLink(source=str(model), target=value_c, value='下属社区'))
 
     return categories, nodes, links
@@ -575,10 +572,9 @@ def get_community_data(model_name, model):
         cate_name = '编号'
         link_name = '社区编号'
 
-
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
-        #事件最多大类
+        # 事件最多大类
         type_count = Event.objects.filter(community=id).values('type').annotate(count=Count('type')).values('type','count').order_by('-count')
         type_count = list(type_count)
 
@@ -639,15 +635,14 @@ def wordcloud():
 
     c = (
         WordCloud()
-            .add(series_name= "wordcloud", data_pair=data, word_size_range=[20, 200])
-            .set_global_opts(
+        .add(series_name= "wordcloud", data_pair=data, word_size_range=[20, 200])
+        .set_global_opts(
             title_opts=opts.TitleOpts(
                 title='wordcloud', title_textstyle_opts=opts.TextStyleOpts(font_size=23)
             ),
             tooltip_opts=opts.TooltipOpts(is_show=True),
         )
-            .dump_options_with_quotes()
-            # .render("basic_wordcloud.html")
+        .dump_options_with_quotes()
+        # .render("basic_wordcloud.html")
     )
-    print('yes')
     return c
