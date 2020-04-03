@@ -22,17 +22,17 @@
                             <div style="width: 200px; align-self: center">
                                 <form role="search" method="GET" class="app-search hidden-sm hidden-xs m-r-10">
                                     {% if kg_search %}
-                                        <input type="text" name="kgsearch" id="kgsearch_id" class="form-control" value="{{ kg_search }}" required>
+                                        <input type="text" name="search" id="kgsearch_id" class="form-control" value="{{ kg_search }}" required>
                                     {% else %}
-                                        <input type="text" name="kgsearch" id="kgsearch_id" placeholder="Search..." class="form-control" required>
+                                        <label for="kgsearch_id"></label>
+                                        <input type="text" name="search" id="kgsearch_id" placeholder="Search..." class="form-control" required>
                                     {% endif %}
                                     <a>
                                         <i class="fa fa-search" onclick="kgsearch()"></i>
-                                        <script type="text/javascript" language="JavaScript">
+                                        <script type="text/javascript">
                                             function kgsearch() {
                                                 let searchBar = document.getElementById("kgsearch_id");
-                                                let toUrl = "http://" + self.location.host + "/kgraph?search=" + searchBar.value;
-                                                self.location.href = toUrl;
+                                                self.location.href = "http://" + self.location.host + "/kgraph?search=" + searchBar.value;
                                             }
                                         </script>
                                     </a>
@@ -41,15 +41,14 @@
                             <div id="graph" class="chart-container" style="height: 800px;"></div>
                             <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.9.0/jquery.min.js"></script>
 
-                            <script type="text/javascript"  language="JavaScript">
+                            <script type="text/javascript">
                                 let graph_chart = echarts.init(
                                     document.getElementById('graph'), 'white', {renderer: 'canvas'}
                                 );
                                 graph_chart.setOption({{ graph | safe}});
                                 graph_chart.on('click',function(params){
-                                    if (params.seriesType =='wordCloud'){
-                                        let toUrl="http://"+self.location.host+"/kgraph?search="+params.name;
-                                        self.location.href=toUrl;
+                                    if (params.seriesType ==='wordCloud'){
+                                        self.location.href="http://" + self.location.host + "/kgraph?search=" + params.name;
                                     }
                                     else {
                                         let option = graph_chart.getOption();

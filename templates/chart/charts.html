@@ -55,7 +55,7 @@
                             <h3 class="box-title">Calendar</h3>
                             <div id="calendar" class="chart-container" style="height: 350px"></div>
                             <script>
-                                var calendar_chart = echarts.init(
+                                let calendar_chart = echarts.init(
                                     document.getElementById('calendar'), 'white', {renderer: 'svg'}
                                 );
                                 calendar_chart.setOption({{ calendar_chart | safe}});
@@ -73,8 +73,8 @@
                             <h3 class="box-title">Pie</h3>
                             <div id="pie" class="chart-container" style="height: 500px;"></div>
                             <script>
-                                var pie_chart = echarts.init(
-                                    document.getElementById('pie'), 'white', {renderer: 'svg'}
+                                let pie_chart = echarts.init(
+                                    document.getElementById('pie'), 'white', {renderer: 'canvas'}
                                 );
                                 pie_chart.setOption({{ pie_chart | safe}});
                             </script>
@@ -85,8 +85,8 @@
                             <h3 class="box-title">Sunburst</h3>
                             <div id="sunburst" class="chart-container" style="height: 500px;"></div>
                             <script>
-                                var sunburst_chart = echarts.init(
-                                    document.getElementById('sunburst'), 'white', {renderer: 'svg'}
+                                let sunburst_chart = echarts.init(
+                                    document.getElementById('sunburst'), 'white', {renderer: 'canvas'}
                                 );
                                 sunburst_chart.setOption({{ sunburst_chart | safe}});
                             </script>
@@ -103,8 +103,8 @@
                             <h3 class="box-title">Wordcloud</h3>
                             <div id="wordcloud" class="chart-container" style="height: 500px;"></div>
                             <script>
-                                var wordcloud_chart = echarts.init(
-                                    document.getElementById('wordcloud'), 'white', {renderer: 'svg'}
+                                let wordcloud_chart = echarts.init(
+                                    document.getElementById('wordcloud'), 'white', {renderer: 'canvas'}
                                 );
                                 wordcloud_chart.setOption({{ wordcloud_chart | safe}});
                             </script>
@@ -115,8 +115,8 @@
                             <h3 class="box-title">Map</h3>
                             <div id="map" class="chart-container" style="height: 500px;"></div>
                             <script>
-                                var map_chart = echarts.init(
-                                    document.getElementById('map'), 'white', {renderer: 'svg'}
+                                let map_chart = echarts.init(
+                                    document.getElementById('map'), 'white', {renderer: 'canvas'}
                                 );
                                 map_chart.setOption({{ map_chart | safe}});
                             </script>

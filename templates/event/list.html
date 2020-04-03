@@ -21,7 +21,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="white-box">
-                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
                                 <select datatype="text" class="form-control pull-right row b-none" name="status" id="id_status" onchange="Filter()">
                                     <option value="">--</option>
                                     <option value="处理中">处理中</option>
@@ -29,7 +29,15 @@
                                     <option value="逾期结办">逾期结办</option>
                                 </select>
                             </div>
-                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="source" id="id_source" onchange="Filter()">
+                                    <option value="">--</option>
+                                    {% for source in src %}
+                                        <option value="{{ source }}">{{ source }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
                                 <select datatype="text" class="form-control pull-right row b-none" name="event_type" id="id_event_type" onchange="Filter()">
                                     <option value="">--</option>
                                     {% for type in types %}
@@ -37,7 +45,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
                                 <select datatype="text" class="form-control pull-right row b-none" name="property" id="id_property" onchange="Filter()">
                                     <option value="">--</option>
                                     {% for pro in properties %}

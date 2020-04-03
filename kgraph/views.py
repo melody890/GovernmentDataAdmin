@@ -126,11 +126,11 @@ def get_data(model_name, model):
     return categories, nodes, links
 
 
-def create_node(source_node, categories, cate_name, nodes, node_name, links, link_name):
+def create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value='-'):
     categories.append(opts.GraphCategory(cate_name))
     print(cate_name)
-    l = len(categories) - 1
-    nodes.append(opts.GraphNode(name=node_name, symbol_size=50, category=l))
+    length = len(categories) - 1
+    nodes.append(opts.GraphNode(name=node_name, value=node_value, symbol_size=50, category=length))
     print(node_name)
     links.append(opts.GraphLink(source=source_node, target=node_name, value=link_name))
     print(link_name)
@@ -339,10 +339,8 @@ def set_max_community_node(model_name, model, categories, nodes, links):
     categories.append(opts.GraphCategory(name=name))
     index = len(categories) - 1
     value = str(max_community)
-    nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+    nodes.append(opts.GraphNode(name=value, value=str(max_num), symbol_size=50, category=index))
     links.append(opts.GraphLink(source=str(model), target=value, value='发生最多的街道'))
-
-    return 0
 
 
 def get_maintype_data(model):
@@ -350,11 +348,11 @@ def get_maintype_data(model):
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
     links = []
 
-    set_number_node(model,categories,nodes,links)
+    set_number_node(model, categories, nodes, links)
 
-    set_type_node('MainType',model,categories,nodes,links)
+    set_type_node('MainType', model, categories, nodes, links)
 
-    set_max_community_node('MainType',model,categories,nodes,links)
+    set_max_community_node('MainType', model, categories, nodes, links)
 
     subtypes = SubType.objects.filter(main_type=model)
     name = '小类'
@@ -364,8 +362,8 @@ def get_maintype_data(model):
         value = str(subtype)
         if value == str(model) or value == str(model.type):
             value = value + '（问题小类）'
-        nodes.append(opts.GraphNode(name=value,symbol_size=50,category=index))
-        links.append(opts.GraphLink(source=str(model),target=value,value='下属小类'))
+        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+        links.append(opts.GraphLink(source=str(model), target=value, value='下属小类'))
 
     return categories, nodes, links
 
@@ -468,12 +466,12 @@ def get_subtype_data(model_name, model):
         com_name = Community.objects.get(id=com['community']).name
         print(com_name)
 
-        node_name = com_name + ':' + str(com['count'])
+        node_name = com_name
         cate_name = '社区'
         link_name = '小类发生最多社区'
         source_node = str(model)
 
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=str(com['count']))
 
         # 小类编号
         sub_model = SubType.objects.filter(id=id)[0]
@@ -493,7 +491,7 @@ def get_subtype_data(model_name, model):
         link_name = '事件总数'
         source_node = str(model)
 
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=node_name)
 
     except Exception as e:
         print(e)
@@ -525,9 +523,9 @@ def get_disposeunit_data(model_name,model):
         print(is_achieve_count)
         y = is_achieve_count[0]['count']
         n = is_achieve_count[1]['count']
-        percent = round(y *100/ (y + n), 2)
+        percent = round(y * 100 / (y + n), 2)
 
-        node_name = str((percent)) + '%'
+        node_name = str(percent) + '%'
         cate_name = '百分比'
         link_name = '完成事件百分比'
 
@@ -582,12 +580,11 @@ def get_community_data(model_name, model):
         t = Type.objects.filter(id=tid)[0]
         c = type_count[0]['count']
 
-        node_name = str(t)+':'+str(c)
+        node_name = str(t)
         cate_name = '大类'
         link_name = '事件最多大类'
 
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
-
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=str(c))
 
         # 社区事件总数
         node_name = str(com_model.number)
@@ -602,10 +599,10 @@ def get_community_data(model_name, model):
 
         x = com_model.number
         y = strt.number
-        Percentage = round(x*100/y,2)
+        percentage = round(x*100/y, 2)
 
         cate_name = '百分比'
-        node_name = str(Percentage)+'%'
+        node_name = str(percentage)+'%'
         link_name = '事件占街道百分比'
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
@@ -638,7 +635,7 @@ def wordcloud():
         .add(series_name= "wordcloud", data_pair=data, word_size_range=[20, 200])
         .set_global_opts(
             title_opts=opts.TitleOpts(
-                title='wordcloud', title_textstyle_opts=opts.TextStyleOpts(font_size=23)
+                title='', title_textstyle_opts=opts.TextStyleOpts(font_size=23)
             ),
             tooltip_opts=opts.TooltipOpts(is_show=True),
         )

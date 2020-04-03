@@ -116,15 +116,10 @@ def my_filter(keyword, events_list):
 
 @login_required(login_url='/user/login/')
 def event_list(request):
-    search = request.GET.get('search')
     events = Event.objects.all()
     properties = Property.objects.all()
     types = Type.objects.all()
-
-    if search:
-        events = my_filter(search, events)
-    else:
-        search = ""
+    sources = EventSource.objects.all()
 
     paginator = Paginator(events, 20)
     page = request.GET.get('page')
@@ -134,7 +129,7 @@ def event_list(request):
         "properties": properties,
         "event_list": events_list,
         "types": types,
-        "search": search,
+        "src": sources,
     }
     return render(request, 'event/list.html', context)
 
