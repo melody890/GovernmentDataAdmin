@@ -10,7 +10,7 @@ from pyecharts.charts import WordCloud
 from pyecharts import options as opts
 
 from event.views import filter_model
-from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit
+from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit,Property
 
 import random
 
@@ -137,7 +137,7 @@ def create_node(source_node, categories, cate_name, nodes, node_name, links, lin
 
     return 0
 
-
+# 事件性质
 def get_property_data(model_name, model):
     events = model.event.get_queryset()
     intime_number = 0
@@ -200,9 +200,10 @@ def get_property_data(model_name, model):
 
     return categories, nodes, links
 
-
+# 事件来源
 def get_source_data(model_name, model):
     events = model.event.get_queryset()
+# 对应性质
     property_list = {}
     for event in events:
         proper = event.property.name
@@ -211,6 +212,7 @@ def get_source_data(model_name, model):
         else:
             property_list.update({proper: 1})
 
+# 占事件总数百分比
     ratio = '{:.2f}%'.format(model.number / Event.objects.count() * 100)
     number_max = 0
     for key in property_list:
@@ -296,13 +298,14 @@ def set_type_node(model_name, model, categories, nodes, links):
         model = model.main_type
 
     thetype = model.type
+    type_number = model.type.number
     name = '类型'
     categories.append(opts.GraphCategory(name=name))
     index = len(categories) - 1
     value = str(thetype)
     if (model_name == 'SubType' and value == str(sub_model)) or value == str(model):
         value = value + '（问题类型）'
-    nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+    nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index,value=type_number))
     links.append(opts.GraphLink(source=str(model), target=value, value='类型'))
 
     return 0
@@ -335,23 +338,24 @@ def set_max_community_node(model_name, model, categories, nodes, links):
             if now_num > max_num:
                 max_num = now_num
                 max_community = community
-    name = '街道'
+    name = '社区'
     categories.append(opts.GraphCategory(name=name))
     index = len(categories) - 1
     value = str(max_community)
     nodes.append(opts.GraphNode(name=value, value=str(max_num), symbol_size=50, category=index))
-    links.append(opts.GraphLink(source=str(model), target=value, value='发生最多的街道'))
+    links.append(opts.GraphLink(source=str(model), target=value, value='发生最多的社区'))
 
 
 def get_maintype_data(model):
+    number = model.number
     categories = [opts.GraphCategory(name='大类')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0,value=number)]
     links = []
-
+    # 事件数量
     set_number_node(model, categories, nodes, links)
-
+    # 所属类型
     set_type_node('MainType', model, categories, nodes, links)
-
+    # 事件最多社区
     set_max_community_node('MainType', model, categories, nodes, links)
 
     subtypes = SubType.objects.filter(main_type=model)
@@ -360,32 +364,35 @@ def get_maintype_data(model):
     index = len(categories)-1
     for subtype in subtypes:
         value = str(subtype)
+        sub_number = subtype.number
         if value == str(model) or value == str(model.type):
             value = value + '（问题小类）'
-        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index, value=sub_number))
         links.append(opts.GraphLink(source=str(model), target=value, value='下属小类'))
 
     return categories, nodes, links
 
 
 def get_type_data(model):
+    number = model.number
     categories = [opts.GraphCategory(name='类型')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0,value=number)]
     links = []
-
+    # 事件总数量
     set_number_node(model, categories, nodes, links)
-
+    # 事件最多社区
     set_max_community_node('Type', model, categories, nodes, links)
-
+    # 类型下所有大类
     maintypes = MainType.objects.filter(type=model)
     name = '大类'
     categories.append(opts.GraphCategory(name=name))
     index = len(categories) - 1
     for maintype in maintypes:
         value = str(maintype)
+        number = maintype.number
         if value == str(model):
             value = value + '（问题大类）'
-        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index))
+        nodes.append(opts.GraphNode(name=value, symbol_size=50, category=index,value=number))
         links.append(opts.GraphLink(source=str(model), target=value, value='下属大类'))
 
     return categories, nodes, links
@@ -393,57 +400,69 @@ def get_type_data(model):
 
 def get_street_data(model_name, model):
     categories = [opts.GraphCategory(name='街道')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
+    str_number = model.number
+    nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0, value=str_number)]
     links = []
 
+# 街道所属区域
     districts = District.objects.all()
     for district in districts:
-        name_c = District.name
+        number_c = district.number
+        name_c = district.name
         if name_c == 'name' or name_c == 'id':
             continue
         value_c = str(district)
         categories.append(opts.GraphCategory(name='区域'))
         index_c = len(categories)-1
-        nodes.append(opts.GraphNode(name=value_c, symbol_size=60, category=index_c))
+        nodes.append(opts.GraphNode(name=value_c, symbol_size=60, category=index_c,value=number_c))
         links.append(opts.GraphLink(source=str(model), target=value_c, value='所属区域'))
 
+# 街道下所有社区及其数量
     communities = Community.objects.filter(street=model)
     for community in communities:
         name_c = Community.name
+        number_c = community.number
+        # ratio_c = str((round(number_c*100/str_number,2)))+'%'
         if name_c == 'name' or name_c == 'id':
             continue
         value_c = str(community)
         categories.append(opts.GraphCategory(name='社区'))
         index_c = len(categories)-1
-        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c))
+        nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c,value=number_c))
         links.append(opts.GraphLink(source=str(model), target=value_c, value='下属社区'))
+
 
     return categories, nodes, links
 
 
 def get_district_data(model_name, model):
     categories = [opts.GraphCategory(name='区域')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0)]
+    number_d = model.number
+    nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0,value=number_d)]
     links = []
+
 
     streets = Street.objects.filter(district=model)
     for street in streets:
         name_s = Street.name
+        number_s = street.number
         if name_s == 'name' or name_s == 'id':
             continue
         value_s = str(street)
         categories.append(opts.GraphCategory(name='街道'))
         index_s = len(categories)-1
-        nodes.append(opts.GraphNode(name=value_s, symbol_size=60, category=index_s))
+        nodes.append(opts.GraphNode(name=value_s, symbol_size=60, category=index_s,value=number_s))
         links.append(opts.GraphLink(source=str(model), target=value_s, value='下属街道'))
 
     return categories, nodes, links
 
-
+# 小类
 def get_subtype_data(model_name, model):
     categories = [opts.GraphCategory(name='小类')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    number = model.number
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0, value=number)]
     links = []
+
 
     id = SubType.objects.filter(name=str(model)).values("id")[0]['id']
     sub_model = SubType.objects.filter(id=id)[0]
@@ -455,8 +474,10 @@ def get_subtype_data(model_name, model):
         cate_name = '大类'
         link_name = '所属大类'
         source_node = str(model)
+        maintype_number = sub_model.main_type.number
 
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=maintype_number)
 
         # 小类发生最多的社区名
         coms = Event.objects.filter(sub_type_id=id).values('community').annotate(count=Count('community')).values(
@@ -500,8 +521,9 @@ def get_subtype_data(model_name, model):
 
 
 def get_disposeunit_data(model_name,model):
+    number_dis = str(model.number)
     categories = [opts.GraphCategory(name='执行部门')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0, value=number_dis)]
     links = []
 
     id = DisposeUnit.objects.filter(name=str(model)).values("id")[0]['id']
@@ -545,10 +567,11 @@ def get_disposeunit_data(model_name,model):
 
     return categories, nodes, links
 
-
+# 社区
 def get_community_data(model_name, model):
+    com_number = model.number
     categories = [opts.GraphCategory(name='社区')]
-    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0)]
+    nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0,value=com_number)]
     links = []
 
     id = Community.objects.filter(name=str(model)).values("id")[0]['id']
@@ -556,13 +579,14 @@ def get_community_data(model_name, model):
 
     try:
         # 社区所属街道
+        str_number = com_model.street.number
         node_name = str(com_model.street)
         print(node_name)
         cate_name = '街道'
         link_name = '所属街道'
         source_node = str(com_model)
 
-        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
+        create_node(source_node, categories, cate_name, nodes, node_name, links, link_name,node_value= str_number)
 
         # 编号
         aid = com_model.aID
@@ -572,7 +596,7 @@ def get_community_data(model_name, model):
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name)
 
-        # 事件最多大类
+        # 事件最多类型
         type_count = Event.objects.filter(community=id).values('type').annotate(count=Count('type')).values('type','count').order_by('-count')
         type_count = list(type_count)
 
@@ -581,14 +605,14 @@ def get_community_data(model_name, model):
         c = type_count[0]['count']
 
         node_name = str(t)
-        cate_name = '大类'
-        link_name = '事件最多大类'
+        cate_name = '类型'
+        link_name = '事件最多类型'
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=str(c))
 
         # 社区事件总数
         node_name = str(com_model.number)
-        print(node_name)
+        # print(node_name)
         cate_name = '数量'
         link_name = '事件总数'
 
