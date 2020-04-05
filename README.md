@@ -16,8 +16,8 @@ GovernmentDataAdmin/
 		base.html	# 基本模板
 		footer.html     # 页脚
 		header.html	# 页眉
-		sidebar.html# 侧边栏
-	templates/ # 前端html文件
+		sidebar.html    # 侧边栏
+	templates/  # 前端html文件
 	user/ # 用户app
 	db
 	manage.py
