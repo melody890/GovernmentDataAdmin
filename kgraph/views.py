@@ -10,7 +10,7 @@ from pyecharts.charts import WordCloud
 from pyecharts import options as opts
 
 from event.views import filter_model
-from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit,Property
+from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit, Property
 
 import random
 
@@ -431,6 +431,39 @@ def get_street_data(model_name, model):
         nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c,value=number_c))
         links.append(opts.GraphLink(source=str(model), target=value_c, value='下属社区'))
 
+    num_sum_s = 0
+    max_s = 0
+    max_t = 0
+    num_s = 0
+    properties = Property.objects.all()
+    communities = Community.objects.filter(street=model)
+    types = Type.objects.all()
+    for property in properties:
+        for community in communities:
+            events = Event.objects.filter(community=community, property=property)
+            num_s = num_s + len(events)
+            num_sum_s = num_sum_s + len(events)
+        if max_s < num_s:
+            max_s = num_s
+            max_property = property
+        num_s = 0
+        for type in types:
+            events = Event.objects.filter(type=type, property=property)
+            num_s = num_s + len(events)
+        if max_t < num_s:
+            max_t = num_s
+            max_type = type
+        num_s = 0
+
+    percent = '{:.2f}%'.format(max_s*100/num_sum_s)
+    categories.append(opts.GraphCategory(name='事件类型'))
+    index_s = len(categories) - 1
+    categories.append(opts.GraphCategory(name='事件'))
+    index_t = len(categories) - 1
+    nodes.append(opts.GraphNode(name=str(max_property), symbol_size=70, category=index_s))
+    nodes.append(opts.GraphNode(name=str(max_type), symbol_size=50, category=index_t))
+    links.append(opts.GraphLink(source=str(model), target=str(max_property), value='最多事件性质，占比'+str(percent)))
+    links.append(opts.GraphLink(source=str(max_property), target=str(max_type), value='最多事件小类'))
 
     return categories, nodes, links
 
@@ -441,6 +474,10 @@ def get_district_data(model_name, model):
     nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0,value=number_d)]
     links = []
 
+    num_sum_s = 0
+    max_s = 0
+    num_s = 0
+    max_t = 0
 
     streets = Street.objects.filter(district=model)
     for street in streets:
@@ -453,6 +490,35 @@ def get_district_data(model_name, model):
         index_s = len(categories)-1
         nodes.append(opts.GraphNode(name=value_s, symbol_size=60, category=index_s,value=number_s))
         links.append(opts.GraphLink(source=str(model), target=value_s, value='下属街道'))
+
+    properties = Property.objects.all()
+    communities = Community.objects.all()
+    types = Type.objects.all()
+    for property in properties:
+        for community in communities:
+            events = Event.objects.filter(community=community, property=property)
+            num_s = num_s + len(events)
+            num_sum_s = num_sum_s + len(events)
+        if max_s < num_s:
+            max_s = num_s
+            max_property = property
+        num_s = 0
+        for type in types:
+            events = Event.objects.filter(type=type, property=property)
+            num_s = num_s + len(events)
+        if max_t < num_s:
+            max_t = num_s
+            max_type = type
+        num_s = 0
+    percent = '{:.2f}%'.format(max_s * 100 / num_sum_s)
+    categories.append(opts.GraphCategory(name='事件类型'))
+    index_s = len(categories) - 1
+    categories.append(opts.GraphCategory(name='事件'))
+    index_t = len(categories) - 1
+    nodes.append(opts.GraphNode(name=str(max_property), symbol_size=70, category=index_s))
+    nodes.append(opts.GraphNode(name=str(max_type), symbol_size=50, category=index_t))
+    links.append(opts.GraphLink(source=str(model), target=str(max_property), value='最多事件，占比' + str(percent)))
+    links.append(opts.GraphLink(source=str(max_property), target=str(max_type), value='最多事件小类'))
 
     return categories, nodes, links
 
