@@ -1,5 +1,3 @@
-import json
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
@@ -10,7 +8,7 @@ from pyecharts.charts import WordCloud
 from pyecharts import options as opts
 
 from event.views import filter_model
-from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit,Property
+from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit, Property
 
 import random
 
@@ -137,6 +135,7 @@ def create_node(source_node, categories, cate_name, nodes, node_name, links, lin
 
     return 0
 
+
 # 事件性质
 def get_property_data(model_name, model):
     events = model.event.get_queryset()
@@ -199,6 +198,7 @@ def get_property_data(model_name, model):
     ]
 
     return categories, nodes, links
+
 
 # 事件来源
 def get_source_data(model_name, model):
@@ -275,7 +275,7 @@ def get_achive_data(model_name, model):
     ]
 
     links = [
-        opts.GraphLink(source=str(model.name), target=str(model.number), value=50),
+        opts.GraphLink(source=str(model.name), target=str(model.number), value="事件数量"),
         opts.GraphLink(source=str(model.name), target=unit, value="最多 " + str(model.name) + " 处置机构"),
         opts.GraphLink(source=str(model.name), target=ratio, value="事件占比"),
     ]
@@ -431,7 +431,6 @@ def get_street_data(model_name, model):
         nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c,value=number_c))
         links.append(opts.GraphLink(source=str(model), target=value_c, value='下属社区'))
 
-
     return categories, nodes, links
 
 
@@ -440,7 +439,6 @@ def get_district_data(model_name, model):
     number_d = model.number
     nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0,value=number_d)]
     links = []
-
 
     streets = Street.objects.filter(district=model)
     for street in streets:
@@ -456,13 +454,13 @@ def get_district_data(model_name, model):
 
     return categories, nodes, links
 
+
 # 小类
 def get_subtype_data(model_name, model):
     categories = [opts.GraphCategory(name='小类')]
     number = model.number
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0, value=number)]
     links = []
-
 
     id = SubType.objects.filter(name=str(model)).values("id")[0]['id']
     sub_model = SubType.objects.filter(id=id)[0]
@@ -475,7 +473,6 @@ def get_subtype_data(model_name, model):
         link_name = '所属大类'
         source_node = str(model)
         maintype_number = sub_model.main_type.number
-
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=maintype_number)
 
@@ -566,6 +563,7 @@ def get_disposeunit_data(model_name,model):
         print(e)
 
     return categories, nodes, links
+
 
 # 社区
 def get_community_data(model_name, model):
