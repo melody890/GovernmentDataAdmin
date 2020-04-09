@@ -133,12 +133,11 @@
                 let wordItem = { label: wordList[i], url: newUrl, target: '_top' };
                 entries.push(wordItem)
             }
-
             let settings = {
                 entries: entries,
                 width: 840,
                 height: 880,
-                radius: '65%',
+                radius: '72%',
                 radiusMin: 75,
                 bgDraw: true,
                 bgColor: 'white',
@@ -150,15 +149,13 @@
                 fontFamily: 'Oswald, Arial, sans-serif',
                 fontSize: '25',
                 fontColor: '#25222b',
-                fontWeight: 'normal',//bold
+                fontWeight: 'bold',//bold
                 fontStyle: 'normal',//italic
                 fontStretch: 'normal',//wider, narrower, ultra-condensed, extra-condensed, condensed, semi-condensed, semi-expanded, expanded, extra-expanded, ultra-expanded
                 fontToUpperCase: true
-
             };
             //var svg3DTagCloud = new SVG3DTagCloud( document.getElementById( 'holder'  ), settings );
             $( '#tag-cloud' ).svg3DTagCloud( settings );
-
         } );
     </script>
 {% endblock script %}
