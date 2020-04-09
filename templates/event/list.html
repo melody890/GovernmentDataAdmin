@@ -21,35 +21,59 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="white-box">
-                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
-                                <select datatype="text" class="form-control pull-right row b-none" name="status" id="id_status" onchange="Filter()">
-                                    <option value="">--</option>
-                                    <option value="处理中">处理中</option>
-                                    <option value="按期结办">按期结办</option>
-                                    <option value="逾期结办">逾期结办</option>
+                            <div class="col-md-1 col-sm-3 col-xs-5 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="status" id="id_status" onchange="Filter('status')">
+                                    <option value="">状态</option>
+                                    <option name="处理中" value="处理中">处理中</option>
+                                    <option name="按期办结" value="按期办结">按期</option>
+                                    <option name="逾期办结" value="逾期办结">逾期</option>
                                 </select>
                             </div>
-                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
-                                <select datatype="text" class="form-control pull-right row b-none" name="source" id="id_source" onchange="Filter()">
-                                    <option value="">--</option>
+                            <div class="col-md-1 col-sm-3 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="source" id="id_source" onchange="Filter('source')">
+                                    <option value="">来源</option>
                                     {% for source in src %}
-                                        <option value="{{ source }}">{{ source }}</option>
+                                        <option value="{{ source }}" name="{{ source }}">{{ source }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
-                                <select datatype="text" class="form-control pull-right row b-none" name="event_type" id="id_event_type" onchange="Filter()">
-                                    <option value="">--</option>
+                            <div class="col-md-2 col-sm-3 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="main_type" id="id_main_type" onchange="Filter('maintype')">
+                                    <option value="">大类</option>
+                                    {% for maintype in maintypes %}
+                                        <option value="{{ maintype }}" name="{{ maintype }}">{{ maintype }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-1 col-sm-3 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="event_type" id="id_event_type" onchange="Filter('type')">
+                                    <option value="">类型</option>
                                     {% for type in types %}
-                                        <option value="{{ type }}">{{ type }}</option>
+                                        <option name="{{ type }}" value="{{ type }}">{{ type }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-2 col-sm-4 col-xs-6 pull-right">
-                                <select datatype="text" class="form-control pull-right row b-none" name="property" id="id_property" onchange="Filter()">
-                                    <option value="">--</option>
+                            <div class="col-md-1 col-sm-3 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="property" id="id_property" onchange="Filter('property')">
+                                    <option value="">性质</option>
                                     {% for pro in properties %}
-                                        <option value="{{ pro }}">{{ pro }}</option>
+                                        <option value="{{ pro }}" name="{{ pro }}">{{ pro }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-1 col-sm-3 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="community" id="id_community" onchange="Filter('community')">
+                                    <option value="">社区</option>
+                                    {% for community in communities %}
+                                        <option value="{{ community }}" name="{{ community }}">{{ community }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-1 col-sm-3 col-xs-6 pull-right">
+                                <select datatype="text" class="form-control pull-right row b-none" name="street" id="id_street" onchange="Filter('street')">
+                                    <option value="">街道</option>
+                                    {% for street in streets %}
+                                        <option value="{{ street }}" name="{{ street }}">{{ street }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -83,9 +107,9 @@
                                             <td>{{ event.event_src }}</td>
                                             {% if event.achieve.status == 'intime_to' %}
                                                 <td class="achieve">处理中</td>
-                                                <td class="status"><a onclick="Filter('intime', '{{ event.rec_id }}')" class="btn btn btn-rounded btn-default btn-outline m-r-5"><i class="ti-check text-success m-r-5"></i>按期</a><a onclick="Filter('overtime', '{{ event.rec_id }}')" class="btn-rounded btn btn-default btn-outline"><i class="ti-close text-danger m-r-5"></i>逾期</a></td>
+                                                <td class="status"><a class="btn-outline" onclick="dispose('intime', '{{ event.rec_id }}')"><i class="ti-check text-success m-r-5"></i>按期</a><a class="btn-outline" onclick="dispose('overtime', '{{ event.rec_id }}')"><i class="ti-close text-danger m-r-5"></i>逾期</a></td>
                                             {% elif event.achieve.status == 'intime' %}
-                                                <td>按期办结</td>
+                                                <td class>按期办结</td>
                                                 <td></td>
                                             {% elif event.achieve.status == 'overtime' %}
                                                 <td>逾期办结</td>
@@ -99,19 +123,19 @@
                                     <ul class="pagination">
                                         {% if event_list.has_previous %}
                                         <li class="page-item">
-                                            <a class="page-link" href="?page=1search={{ search }}" aria-label="Previous">
+                                            <a class="page-link" href="?page=1{{ url }}" aria-label="Previous">
                                                 <span aria-hidden="true">&laquo;</span>
                                                 <span class="sr-only">Previous</span>
                                             </a>
                                         </li>
-                                        <li class="page-item"><a class="page-link" href="?page={{ event_list.previous_page_number }}&search={{ search }}">{{ event_list.previous_page_number }}</a></li>
+                                        <li class="page-item"><a class="page-link" href="?page={{ event_list.previous_page_number }}{{ url }}">{{ event_list.previous_page_number }}</a></li>
                                         {% endif %}
                                         <li class="page-item active"><a class="page-link" href="#">{{ event_list.number }}</a></li>
 
                                         {% if event_list.has_next %}
-                                        <li class="page-item"><a class="page-link" href="?page={{ event_list.next_page_number }}&search={{ search }}">{{ event_list.next_page_number }}</a></li>
+                                        <li class="page-item"><a class="page-link" href="?page={{ event_list.next_page_number }}{{ url }}">{{ event_list.next_page_number }}</a></li>
                                         <li class="page-item">
-                                            <a class="page-link" href="?page={{ event_list.paginator.num_pages }}&search={{ search }}" aria-label="Next">
+                                            <a class="page-link" href="?page={{ event_list.paginator.num_pages }}{{ url }}" aria-label="Next">
                                                 <span aria-hidden="true">&raquo;</span>
                                                 <span class="sr-only">Next</span>
                                             </a>
@@ -129,64 +153,29 @@
             {% include 'footer.html' %}
             </div>
             <script type="text/javascript">
-                function Filter(method="filter", eventID) {
+                function dispose(status, eventID) {
+                    let eventList = document.querySelectorAll("tr.event");
                     if ("WebSocket" in window) {
-                        //alert("您的浏览器支持WebSocket!");
                         let ws = new WebSocket("ws://"+ window.location.host + "/ws/event/list/");
-                        let searchValue = document.getElementById('search_id').value;
-                        let statusValue = document.getElementById("id_status").value;
-                        let typeValue = document.getElementById("id_event_type").value;
-                        let propertyValue = document.getElementById("id_property").value;
                         ws.onopen = function () {
                             ws.send(JSON.stringify({
-                                'method': method,
                                 'rec_id': eventID,
-                                'search': searchValue,
-                                'status': statusValue,
-                                'event_type': typeValue,
-                                'property': propertyValue,
+                                'status': status
                             }));
                         };
-                        ws.onmessage = function (evt) {
-                            let received_msg = JSON.parse(evt.data);
-                            let hideList = received_msg['hide_list'];
-                            let disList = received_msg['dis_list'];
-                            let eventList = document.querySelectorAll("tr.event");
-                            if (method !== "filter") {
-                                for (let i=0; i < eventList.length; i++) {
-                                    if (eventList[i].getAttribute('id') === eventID) {
-                                        let achieveElement = eventList[i].getElementsByClassName("achieve")[0];
-                                        let statusElement = eventList[i].getElementsByClassName('status')[0];
-                                        statusElement.innerHTML = "<td></td>";
-                                        if (method === 'intime') {
-                                            achieveElement.innerHTML = "<td>按期办结</td>";
-                                        }
-                                        else {
-                                            achieveElement.innerHTML = "<td>逾期办结</td>";
-                                        }
-                                    }
+                        for (let i=0; i < eventList.length; i++) {
+                            if (eventList[i].getAttribute('id') === eventID) {
+                                let achieveElement = eventList[i].getElementsByClassName("achieve")[0];
+                                let statusElement = eventList[i].getElementsByClassName('status')[0];
+                                statusElement.innerHTML = "<td></td>";
+                                if (status === 'intime') {
+                                    achieveElement.innerHTML = "<td>按期办结</td>";
+                                }
+                                else {
+                                    achieveElement.innerHTML = "<td>逾期办结</td>";
                                 }
                             }
-                            if (hideList.length) {
-                                for (let i = 0; i < eventList.length; i++) {
-                                    for (let j = 0; j < hideList.length; j++) {
-                                        if (eventList[i].getAttribute('id') === hideList[j]) {
-                                            eventList[i].setAttribute("hidden", true);
-                                        }
-                                    }
-                                }
-                            }
-                            if (disList.length) {
-                                for (let i = 0; i < eventList.length; i++) {
-                                    for (let j = 0; j < disList.length; j++) {
-                                        if (eventList[i].getAttribute('id') === disList[j]) {
-                                            eventList[i].removeAttribute('hidden');
-                                        }
-                                    }
-                                }
-                            }
-                        };
-
+                        }
                         ws.onclose = function () {
                             //alert("WebSocket连接已关闭...");
                         };
@@ -194,6 +183,27 @@
                     else {
                         alert("你的浏览器不支持WebSocket!");
                     }
+                }
+            </script>
+            <script type="text/javascript">
+                function Filter(src) {
+                    let statusValue = document.getElementById("id_status").value;
+                    let typeValue = document.getElementById("id_event_type").value;
+                    let mainTypeValue = document.getElementById("id_main_type").value;
+                    let propertyValue = document.getElementById("id_property").value;
+                    let streetValue = document.getElementById("id_street").value;
+                    let communityValue = document.getElementById("id_community").value;
+                    let sourceValue = document.getElementById("id_source").value;
+                    window.location = "http://" + window.location.host + "/event/list/?status="+ statusValue +
+                        "&type=" + typeValue + "&property=" + propertyValue + "&street=" + streetValue +
+                        "&source=" + sourceValue + "&maintype=" + mainTypeValue + "&community=" + communityValue;
+                }
+            </script>
+            <script type="text/javascript">
+                let keyList = {{ keywords|safe }};
+                for (let i in keyList) {
+                    let keyOpt = document.getElementsByName(keyList[i])[0];
+                    keyOpt['selected'] = "selected";
                 }
             </script>
         <!-- /#page-wrapper -->

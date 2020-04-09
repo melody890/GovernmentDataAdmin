@@ -205,6 +205,7 @@ class Event(models.Model):
         SubType,
         on_delete=models.CASCADE,
         related_name='event',
+        blank=True
     )
     # 事件类型
     type = models.ForeignKey(
@@ -219,6 +220,7 @@ class Event(models.Model):
         Community,
         on_delete=models.CASCADE,
         related_name='event',
+        default=1
     )
     # 处置部门
     dispose_unit = models.ForeignKey(

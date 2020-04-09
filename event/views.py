@@ -7,7 +7,9 @@ from django.core.paginator import Paginator
 from django.apps import apps
 
 from .forms import EventForm
-from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType
+from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType, MainType
+
+filter_value = ["status", "type", "property", "street", "source", "maintype", "community"]
 
 
 def update_number():
@@ -109,27 +111,51 @@ def my_filter(keyword, events_list):
         Q(community__street__district__name=keyword) |
         Q(sub_type__name=keyword) |
         Q(sub_type__main_type__name=keyword) |
-        Q(sub_type__main_type__type__name=keyword)
+        Q(sub_type__main_type__type__name=keyword) |
+        Q(achieve__name=keyword)
     )
     return events_list
 
 
 @login_required(login_url='/user/login/')
 def event_list(request):
+    get_key = request.GET.get
     events = Event.objects.all()
+    filter_keywords = []
+    community_list = []
+    maintype_list = []
+    re_url = ""
+    for value in filter_value:
+        keyword = get_key(value)
+        if keyword:
+            events = my_filter(keyword, events)
+            filter_keywords.append(keyword)
+            re_url += "&" + value + "=" + keyword
+            if value == 'street':
+                community_list = Community.objects.all().filter(street__name=keyword)
+            if value == 'type':
+                maintype_list = MainType.objects.all().filter(type__name=keyword)
+
+    print(filter_keywords)
+
     properties = Property.objects.all()
     types = Type.objects.all()
     sources = EventSource.objects.all()
+    street_list = Street.objects.all()
 
     paginator = Paginator(events, 20)
     page = request.GET.get('page')
     events_list = paginator.get_page(page)
-
     context = {
         "properties": properties,
         "event_list": events_list,
         "types": types,
+        "streets": street_list,
+        "maintypes": maintype_list,
+        "communities": community_list,
         "src": sources,
+        "keywords":  filter_keywords,
+        "url": re_url,
     }
     return render(request, 'event/list.html', context)
 
