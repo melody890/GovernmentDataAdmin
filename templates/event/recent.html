@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+
+        <!-- Page Content -->
+        <!-- ============================================================== -->
+        <div id="page-wrapper">
+            <div class="container-fluid">
+                <div class="row bg-title">
+                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+                        <h4 class="page-title">Recent</h4>
+                    </div>
+                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
+                        <ol class="breadcrumb">
+                            <li class="active">Recent</li>
+                        </ol>
+                    </div>
+                    <!-- /.col-lg-12 -->
+                </div>
+                <!-- /row -->
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="white-box">
+                            <h3 class="box-title">List</h3>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped table-condensed flip-content" id="expandabledatatable">
+                                    <thead class="flip-content bordered-darkorange">
+                                       <tr>
+                                            <th>序号</th>
+                                            <th>统计时间</th>
+                                            <th>所属街道和社区</th>
+                                            <th>问题性质</th>
+                                            <th>问题类型</th>
+                                            <th>问题大类</th>
+                                            <th>问题小类</th>
+                                            <th>问题来源</th>
+                                            <th>处置状态</th>
+                                            <th>处置情况</th></tr>
+                                    </thead>
+                                    <tbody id="tbody">
+                                          {% for event in event_list %}
+                                                <tr class="event" id="{{ event.rec_id }}">
+                                                    <td>{{ event.rec_id }}</td>
+                                                    <td>{{ event.create_time }}</td>
+                                                    <td>{{ event.community.street }} {{ event.community }}</td>
+                                                    <td>{{ event.property }}</td>
+                                                    <td>{{ event.sub_type.main_type.type }}</td>
+                                                    <td>{{ event.sub_type.main_type }}</td>
+                                                    <td>{{ event.sub_type }}</td>
+                                                    <td>{{ event.event_src }}</td>
+                                                    {% if event.achieve.status == 'intime_to' %}
+                                                        <td class="achieve">处理中</td>
+                                                        <td class="status"><a onclick="Filter('intime', '{{ event.rec_id }}')" class="btn btn btn-rounded btn-default btn-outline m-r-5"><i class="ti-check text-success m-r-5"></i>按期</a><a onclick="Filter('overtime', '{{ event.rec_id }}')" class="btn-rounded btn btn-default btn-outline"><i class="ti-close text-danger m-r-5"></i>逾期</a></td>
+                                                    {% elif event.achieve.status == 'intime' %}
+                                                        <td>按期办结</td>
+                                                        <td></td>
+                                                    {% elif event.achieve.status == 'overtime' %}
+                                                        <td>逾期办结</td>
+                                                        <td></td>
+                                                    {% endif %}
+                                                </tr>
+                                          {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+            {% include 'footer.html' %}
+        </div>
+            <script>$.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});</script>
+            <script type="text/javascript">
+                $(document).ready(function () {
+                    setInterval("ajaxRequest()",1000);
+                });
+                function ajaxRequest () {
+                    $.ajax({
+                        url: 'http://' + self.location.host + '/event/query/',
+                        type: 'GET',
+                        success: function (result) {
+                            let rows = result.rows;
+                            let infos = document.getElementById("tbody");
+                            $('#tbody tr:eq(0)').remove();
+                                let i = 0;
+                                let tr = document.createElement("tr");
+                                let td1 = document.createElement("td");
+                                let td2 = document.createElement("td");
+                                let td3 = document.createElement("td");
+                                let td4 = document.createElement("td");
+                                let td5 = document.createElement("td");
+                                let td6 = document.createElement("td");
+                                let td7 = document.createElement("td");
+                                let td8 = document.createElement("td");
+                                let td9 = document.createElement("td");
+                                let td10 = document.createElement("td");
+
+
+                                td1.innerHTML = rows[i].rec_id;
+                                td2.innerHTML = rows[i].create_time;
+                                td3.innerHTML = rows[i].street_community;
+                                td4.innerHTML = rows[i].property;
+                                td5.innerHTML = rows[i].type;
+                                td6.innerHTML = rows[i].main_type;
+                                td7.innerHTML = rows[i].sub_type;
+                                td8.innerHTML = rows[i].src;
+                                td9.innerHTML = rows[i].status;
+                                td10.innerHTML = ' ';
+
+                                tr.appendChild(td1);
+                                tr.appendChild(td2);
+                                tr.appendChild(td3);
+                                tr.appendChild(td4);
+                                tr.appendChild(td5);
+                                tr.appendChild(td6);
+                                tr.appendChild(td7);
+                                tr.appendChild(td8);
+                                tr.appendChild(td9);
+                                tr.appendChild(td10);
+
+                                infos.appendChild(tr);
+
+                            $("#tbody").append(infos);
+                            window.count = result.count;
+                        },
+                    });
+                }
+            </script>
+
+        <!-- /#page-wrapper -->
+{% endblock content %}
