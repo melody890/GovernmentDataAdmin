@@ -38,6 +38,7 @@
                                     </a>
                                 </form>
                             </div>
+                        {% if page == "graph" %}
                             <div id="graph" class="chart-container" style="height: 800px;"></div>
                             <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.9.0/jquery.min.js"></script>
 
@@ -104,6 +105,11 @@
                                     }
                                 });
                             </script>
+                        {% else %}
+                            <div class="zzsc-container">
+                                <div id='tag-cloud'></div>
+                            </div>
+                        {% endif %}
                         </div>
                     </div>
                 </div>
@@ -116,5 +122,40 @@
 {% endblock content %}
 
 {% block script %}
-
+    <script src="{% static '3Dwordcloud/js/jquery.svg3dtagcloud.min.js' %}"></script>
+    <script>
+        $( document ).ready( function() {
+            let wordList = {{ graph|safe }};
+            let entries = [];
+            for (let i in wordList) {
+                //alert(wordList[i]);
+                let newUrl = "http://" + self.location.host + "/kgraph?search=" + wordList[i];
+                let wordItem = { label: wordList[i], url: newUrl, target: '_top' };
+                entries.push(wordItem)
+            }
+            let settings = {
+                entries: entries,
+                width: 840,
+                height: 880,
+                radius: '72%',
+                radiusMin: 75,
+                bgDraw: true,
+                bgColor: 'white',
+                opacityOver: 1.00,
+                opacityOut: 0.05,
+                opacitySpeed: 6,
+                fov: 800,
+                speed: 0.5,
+                fontFamily: 'Oswald, Arial, sans-serif',
+                fontSize: '25',
+                fontColor: '#25222b',
+                fontWeight: 'bold',//bold
+                fontStyle: 'normal',//italic
+                fontStretch: 'normal',//wider, narrower, ultra-condensed, extra-condensed, condensed, semi-condensed, semi-expanded, expanded, extra-expanded, ultra-expanded
+                fontToUpperCase: true
+            };
+            //var svg3DTagCloud = new SVG3DTagCloud( document.getElementById( 'holder'  ), settings );
+            $( '#tag-cloud' ).svg3DTagCloud( settings );
+        } );
+    </script>
 {% endblock script %}

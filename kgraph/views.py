@@ -1,5 +1,3 @@
-import json
-
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
@@ -10,9 +8,14 @@ from pyecharts.charts import WordCloud
 from pyecharts import options as opts
 
 from event.views import filter_model
-from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit, Property
+from event.models import Community, SubType, Type, MainType, Event, \
+    Street, District, DisposeUnit, Property, EventSource, Achieve
 
 import random
+
+word_item = [
+    Community, SubType, Type, MainType, Street, DisposeUnit, Property, EventSource, Achieve
+]
 
 
 @login_required(login_url='/user/login/')
@@ -25,14 +28,18 @@ def get_kgraph(request):
             print(model_name)
             print(str(model))
             kgraph = graph(model_name, model)
+            page = "graph"
         else:
-            kgraph = wordcloud()
+            kgraph = get_word()
+            page = "wordcloud"
     else:
-        kgraph = wordcloud()
+        kgraph = get_word()
+        page = "wordcloud"
 
     context = {
         'graph': kgraph,
-        'kg_search': search
+        'kg_search': search,
+        "page": page,
     }
     return render(request, 'kgraph/kgraph.html', context)
 
@@ -137,6 +144,7 @@ def create_node(source_node, categories, cate_name, nodes, node_name, links, lin
 
     return 0
 
+
 # 事件性质
 def get_property_data(model_name, model):
     events = model.event.get_queryset()
@@ -199,6 +207,7 @@ def get_property_data(model_name, model):
     ]
 
     return categories, nodes, links
+
 
 # 事件来源
 def get_source_data(model_name, model):
@@ -275,7 +284,7 @@ def get_achive_data(model_name, model):
     ]
 
     links = [
-        opts.GraphLink(source=str(model.name), target=str(model.number), value=50),
+        opts.GraphLink(source=str(model.name), target=str(model.number), value="事件数量"),
         opts.GraphLink(source=str(model.name), target=unit, value="最多 " + str(model.name) + " 处置机构"),
         opts.GraphLink(source=str(model.name), target=ratio, value="事件占比"),
     ]
@@ -431,40 +440,6 @@ def get_street_data(model_name, model):
         nodes.append(opts.GraphNode(name=value_c, symbol_size=40, category=index_c,value=number_c))
         links.append(opts.GraphLink(source=str(model), target=value_c, value='下属社区'))
 
-    num_sum_s = 0
-    max_s = 0
-    max_t = 0
-    num_s = 0
-    properties = Property.objects.all()
-    communities = Community.objects.filter(street=model)
-    types = Type.objects.all()
-    for property in properties:
-        for community in communities:
-            events = Event.objects.filter(community=community, property=property)
-            num_s = num_s + len(events)
-            num_sum_s = num_sum_s + len(events)
-        if max_s < num_s:
-            max_s = num_s
-            max_property = property
-        num_s = 0
-        for type in types:
-            events = Event.objects.filter(type=type, property=property)
-            num_s = num_s + len(events)
-        if max_t < num_s:
-            max_t = num_s
-            max_type = type
-        num_s = 0
-
-    percent = '{:.2f}%'.format(max_s*100/num_sum_s)
-    categories.append(opts.GraphCategory(name='事件类型'))
-    index_s = len(categories) - 1
-    categories.append(opts.GraphCategory(name='事件'))
-    index_t = len(categories) - 1
-    nodes.append(opts.GraphNode(name=str(max_property), symbol_size=70, category=index_s))
-    nodes.append(opts.GraphNode(name=str(max_type), symbol_size=50, category=index_t))
-    links.append(opts.GraphLink(source=str(model), target=str(max_property), value='最多事件性质，占比'+str(percent)))
-    links.append(opts.GraphLink(source=str(max_property), target=str(max_type), value='最多事件小类'))
-
     return categories, nodes, links
 
 
@@ -473,11 +448,6 @@ def get_district_data(model_name, model):
     number_d = model.number
     nodes = [opts.GraphNode(name=str(model), symbol_size=80, category=0,value=number_d)]
     links = []
-
-    num_sum_s = 0
-    max_s = 0
-    num_s = 0
-    max_t = 0
 
     streets = Street.objects.filter(district=model)
     for street in streets:
@@ -491,36 +461,8 @@ def get_district_data(model_name, model):
         nodes.append(opts.GraphNode(name=value_s, symbol_size=60, category=index_s,value=number_s))
         links.append(opts.GraphLink(source=str(model), target=value_s, value='下属街道'))
 
-    properties = Property.objects.all()
-    communities = Community.objects.all()
-    types = Type.objects.all()
-    for property in properties:
-        for community in communities:
-            events = Event.objects.filter(community=community, property=property)
-            num_s = num_s + len(events)
-            num_sum_s = num_sum_s + len(events)
-        if max_s < num_s:
-            max_s = num_s
-            max_property = property
-        num_s = 0
-        for type in types:
-            events = Event.objects.filter(type=type, property=property)
-            num_s = num_s + len(events)
-        if max_t < num_s:
-            max_t = num_s
-            max_type = type
-        num_s = 0
-    percent = '{:.2f}%'.format(max_s * 100 / num_sum_s)
-    categories.append(opts.GraphCategory(name='事件类型'))
-    index_s = len(categories) - 1
-    categories.append(opts.GraphCategory(name='事件'))
-    index_t = len(categories) - 1
-    nodes.append(opts.GraphNode(name=str(max_property), symbol_size=70, category=index_s))
-    nodes.append(opts.GraphNode(name=str(max_type), symbol_size=50, category=index_t))
-    links.append(opts.GraphLink(source=str(model), target=str(max_property), value='最多事件，占比' + str(percent)))
-    links.append(opts.GraphLink(source=str(max_property), target=str(max_type), value='最多事件小类'))
-
     return categories, nodes, links
+
 
 # 小类
 def get_subtype_data(model_name, model):
@@ -528,7 +470,6 @@ def get_subtype_data(model_name, model):
     number = model.number
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0, value=number)]
     links = []
-
 
     id = SubType.objects.filter(name=str(model)).values("id")[0]['id']
     sub_model = SubType.objects.filter(id=id)[0]
@@ -541,7 +482,6 @@ def get_subtype_data(model_name, model):
         link_name = '所属大类'
         source_node = str(model)
         maintype_number = sub_model.main_type.number
-
 
         create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value=maintype_number)
 
@@ -632,6 +572,7 @@ def get_disposeunit_data(model_name,model):
         print(e)
 
     return categories, nodes, links
+
 
 # 社区
 def get_community_data(model_name, model):
@@ -733,3 +674,28 @@ def wordcloud():
         # .render("basic_wordcloud.html")
     )
     return c
+
+
+def random_get(array, num):
+    ran_list = []
+    length = len(array)
+    for i in range(num):
+        ran_num = random.randint(0, length-1)
+        ran_data = array[ran_num]
+        while ran_data in ran_list:
+            ran_num = random.randint(0, length-1)
+            ran_data = array[ran_num]
+        ran_list.append(ran_data)
+    return ran_list
+
+
+def get_word():
+    data = []
+    for item in word_item:
+        item_models = random_get(list(item.objects.order_by('?')), 3)
+        for model in item_models:
+            data.append(str(model.name))
+
+    print(data)
+
+    return data

@@ -16,8 +16,8 @@ GovernmentDataAdmin/
 		base.html	# 基本模板
 		footer.html     # 页脚
 		header.html	# 页眉
-		sidebar.html# 侧边栏
-	templates/ # 前端html文件
+		sidebar.html    # 侧边栏
+	templates/  # 前端html文件
 	user/ # 用户app
 	db
 	manage.py
@@ -29,10 +29,10 @@ GovernmentDataAdmin/
 
 ## 待完成功能
 
-- 知识图谱词云滚动
-- 事件列表筛选
+- ~~知识图谱词云滚动~~
 - 实时事件滚动显示
 - 知识图谱模型构建
+- ~~列表筛选~~
 - 网页上线
 - 数据库迁移
 
@@ -59,7 +59,8 @@ GovernmentDataAdmin/
 
   - 事件上传功能
   - 事件处置功能
-  - 事件关键词检索功能
+  - ~~事件关键词检索功能~~
+  - **列表筛选**（by Thor）
 
 - ### 用户
 
