@@ -5,7 +5,6 @@ from .models import Profile
 
 class ProfileForm(forms.ModelForm):
     username = forms.CharField()
-    email = forms.EmailField()
 
     class Meta:
         model = Profile
@@ -31,3 +30,10 @@ class UserRegisterForm(forms.ModelForm):
             return data.get('password')
         else:
             raise forms.ValidationError("两次密码输入不一致，请重试。")
+
+class ResetForm(forms.Form):
+    username = forms.CharField()
+    email = forms.CharField()
+
+class ResetPwForm(forms.Form):
+    password = forms.CharField()
