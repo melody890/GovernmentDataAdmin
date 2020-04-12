@@ -8,9 +8,14 @@ from pyecharts.charts import WordCloud
 from pyecharts import options as opts
 
 from event.views import filter_model
-from event.models import Community, SubType, Type, MainType, Event, Street, District, DisposeUnit, Property
+from event.models import Community, SubType, Type, MainType, Event, \
+    Street, District, DisposeUnit, Property, EventSource, Achieve
 
 import random
+
+word_item = [
+    Community, SubType, Type, MainType, Street, DisposeUnit, Property, EventSource, Achieve
+]
 
 
 @login_required(login_url='/user/login/')
@@ -23,14 +28,18 @@ def get_kgraph(request):
             print(model_name)
             print(str(model))
             kgraph = graph(model_name, model)
+            page = "graph"
         else:
-            kgraph = wordcloud()
+            kgraph = get_word()
+            page = "wordcloud"
     else:
-        kgraph = wordcloud()
+        kgraph = get_word()
+        page = "wordcloud"
 
     context = {
         'graph': kgraph,
-        'kg_search': search
+        'kg_search': search,
+        "page": page,
     }
     return render(request, 'kgraph/kgraph.html', context)
 
@@ -665,3 +674,28 @@ def wordcloud():
         # .render("basic_wordcloud.html")
     )
     return c
+
+
+def random_get(array, num):
+    ran_list = []
+    length = len(array)
+    for i in range(num):
+        ran_num = random.randint(0, length-1)
+        ran_data = array[ran_num]
+        while ran_data in ran_list:
+            ran_num = random.randint(0, length-1)
+            ran_data = array[ran_num]
+        ran_list.append(ran_data)
+    return ran_list
+
+
+def get_word():
+    data = []
+    for item in word_item:
+        item_models = random_get(list(item.objects.order_by('?')), 3)
+        for model in item_models:
+            data.append(str(model.name))
+
+    print(data)
+
+    return data
