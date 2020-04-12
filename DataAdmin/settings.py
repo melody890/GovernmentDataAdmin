@@ -130,3 +130,14 @@ STATICFILES_DIRS = (
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+
+# email setting
+EMAIL_USE_SSL = True
+EMAIL_HOST = 'smtp.163.com' 
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'govdataproject@163.com'
+EMAIL_HOST_PASSWORD = 'OQQSBQZIOQRSBIZR'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+CONFIRM_DAYS = 7
