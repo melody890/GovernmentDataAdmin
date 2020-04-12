@@ -152,7 +152,7 @@ def confirm_email(mode,email,code,host):
     elif mode == 'confirm2reset':
         subject = '来自政府大数据平台的密码重置确认邮件'
         html_content = '''
-                            <p>感谢注册<a href="http://{}/user/reset/confirm/{}" target=blank>验证链接</a>，\
+                            <p>验证成功<a href="http://{}/user/reset/confirm/{}" target=blank>验证链接</a>，\
                             这里是政府大数据可视化平台！</p>
                             <p>请点击链接完成重置！</p>
                             <p>此链接有效期为{}天！</p>
