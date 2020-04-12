@@ -1,11 +1,19 @@
+import datetime
+import pytz
+from uuid import uuid4
+
+from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
-from .forms import UserLoginForm, UserRegisterForm, ProfileForm
-from .models import Profile
+from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm
+from .models import Profile, ConfirmString
+
+
 
 
 def index(request):
@@ -46,7 +54,6 @@ def user_logout(request):
     logout(request)
     return redirect(to="user:login")
 
-
 def user_register(request):
     user = request.user
     if user.is_authenticated:
@@ -57,9 +64,12 @@ def user_register(request):
             if user_register_form.is_valid():
                 new_user = user_register_form.save(commit=False)
                 new_user.set_password(user_register_form.cleaned_data['password'])
+                new_user.is_active = False
                 new_user.save()
-                login(request, new_user)
-                return redirect(to="index")
+                email = request.POST.get('email')
+                code = make_confirm_string(new_user)
+                confirm_email('confirm2register',email, code)
+                return HttpResponse("验证邮件已发出，请前往邮箱验证")
             else:
                 return HttpResponse("注册表单有误。请重新输入。")
         elif request.method == 'GET':
@@ -98,7 +108,6 @@ def profile_edit(request, id):
         if profile_form.is_valid():
             profile_cd = profile_form.cleaned_data
             user.username = profile_cd['username']
-            user.email = profile_cd['email']
             profile.phone = profile_cd['phone']
             profile.bio = profile_cd['bio']
 
@@ -119,5 +128,99 @@ def profile_edit(request, id):
             'user': user,
         }
         return render(request, 'user/edit.html', context)
+    else:
+        return HttpResponse("请使用GET或POST请求数据。")
+
+def make_confirm_string(user):
+    code = str(uuid4())
+    ConfirmString.objects.create(code=code, user=user)
+    return code
+
+def confirm_email(mode,email,code):
+
+    text_content = '''这里是政府大数据平台\
+                        如果你看到这条消息，说明你的邮箱服务器不提供HTML链接功能，请联系管理员！'''     
+
+    if mode == 'confirm2register':
+        subject = '来自政府大数据平台的注册确认邮件'        
+        html_content = '''
+                            <p>感谢注册<a href="http://{}/user/register/confirm/{}" target=blank>验证链接</a>，\
+                            这里是政府大数据可视化平台！</p>
+                            <p>请点击链接完成注册！</p>
+                            <p>此链接有效期为{}天！</p>
+                            '''.format('127.0.0.1:8000', code, settings.CONFIRM_DAYS)
+    elif mode == 'confirm2reset':
+        subject = '来自政府大数据平台的密码重置确认邮件'
+        html_content = '''
+                            <p>验证成功<a href="http://{}/user/reset/confirm/{}" target=blank>验证链接</a>，\
+                            这里是政府大数据可视化平台！</p>
+                            <p>请点击链接完成重置！</p>
+                            <p>此链接有效期为{}天！</p>
+                            '''.format('127.0.0.1:8000', code, settings.CONFIRM_DAYS)
+
+    msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [email])
+    msg.attach_alternative(html_content, "text/html")
+
+    msg.send()
+
+def register_confirm(request,code):
+    try:
+        confirm = ConfirmString.objects.get(code=code)
+    except:
+        return HttpResponse('无效的确认请求!')
+
+    c_time = confirm.c_time
+    now = datetime.datetime.now()
+    now = now.replace(tzinfo=pytz.timezone('UTC'))
+    if now > c_time + datetime.timedelta(settings.CONFIRM_DAYS):
+        confirm.user.delete()
+        message = '您的邮件已经过期！请重新注册!'
+    else:
+        confirm.user.is_active = True
+        confirm.user.save()
+        confirm.delete()
+        message = '恭喜您注册成功，赶快尝试登录吧！'
+    return HttpResponse(message)
+
+def reset_password(request):
+    if request.method == 'POST':
+        reset_pw_form = ResetForm(data=request.POST)
+        if reset_pw_form.is_valid():
+            email = request.POST.get('email')
+            username = request.POST.get('username')
+            try:
+                user = User.objects.get(username=username)
+            except:
+                return HttpResponse("账号不存在")
+            if email != user.email:
+                return HttpResponse("账号或邮箱输入错误")
+            code = make_confirm_string(user)
+            confirm_email('confirm2reset',email,code)
+            return HttpResponse("验证邮件已发送，请往邮箱进行验证")
+        else:
+            return HttpResponse("账号或邮箱输入不合法")
+    elif request.method == 'GET':
+        reset_form = ResetForm()
+        context = {'form': reset_form}
+        return render(request, 'user/reset.html', context)
+    else:
+        return HttpResponse("请使用GET或POST请求数据。")
+
+def reset_confirm(request,code):
+    try:
+        confirm = ConfirmString.objects.get(code=code)
+    except:
+        return HttpResponse('无效的确认请求!')
+
+    if request.method == 'POST':
+        newpassword = request.POST.get('newpassword')
+        confirm.user.set_password(newpassword)
+        confirm.user.save()
+        confirm.delete()
+        return HttpResponse('恭喜您重置成功，赶快尝试登录吧！')    
+    elif request.method == 'GET':
+        reset_pw_form = ResetPwForm()
+        context = {'form': reset_pw_form}
+        return render(request, 'user/resetconfirm.html', context)
     else:
         return HttpResponse("请使用GET或POST请求数据。")
