@@ -184,13 +184,14 @@ def event_recent(request):
 # 全局变量，用于计数
 glo_a = 15
 
+
 @login_required(login_url='/user/login/')
 def query(request):
     global glo_a
     events = list(Event.objects.order_by("create_time")[glo_a:glo_a+1])
     data = []
     # 取模的数是循环显示的所有事件的总数
-    glo_a = (glo_a+1)%30
+    glo_a = (glo_a+1) % 30
 
     for event in events:
         st = event.achieve.status
@@ -201,22 +202,16 @@ def query(request):
         else:
             status = '逾期办结'
 
-        dict_row = {}
-        dict_row['rec_id'] = str(event.rec_id)
-        dict_row['create_time'] = event.create_time
-        dict_row['street_community'] = str(event.community.street)+" "+str(event.community)
-        dict_row['property'] = str(event.property)
-        dict_row['type'] = str(event.sub_type.main_type.type)
-        dict_row['main_type'] = str(event.sub_type.main_type)
-        dict_row['sub_type'] = str(event.sub_type)
-        dict_row['src'] = str(event.event_src)
-        dict_row['status'] = status
+        dict_row = {'rec_id': str(event.rec_id), 'create_time': event.create_time,
+                    'street_community': str(event.community.street) + " " + str(event.community),
+                    'property': str(event.property), 'type': str(event.sub_type.main_type.type),
+                    'main_type': str(event.sub_type.main_type), 'sub_type': str(event.sub_type),
+                    'src': str(event.event_src), 'status': status}
         data.append(dict_row)
 
-
-        context = {
-                "rows" : data,
-        }
+    context = {
+        "rows": data,
+    }
     # print(context)
 
     return JsonResponse(context)
