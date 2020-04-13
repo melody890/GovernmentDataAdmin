@@ -84,6 +84,7 @@ def event_post(request):
             'types': types,
             'sources': sources,
             'units': units,
+            'cur_page': "post",
         }
         return render(request, 'event/post.html', context)
 
@@ -156,6 +157,7 @@ def event_list(request):
         "src": sources,
         "keywords":  filter_keywords,
         "url": re_url,
+        'cur_page': "list",
     }
     return render(request, 'event/list.html', context)
 

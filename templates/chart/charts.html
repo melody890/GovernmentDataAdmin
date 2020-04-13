@@ -1,133 +1,64 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-        <!-- Page Content -->
-        <!-- ============================================================== -->
-        <div id="page-wrapper">
-            <div class="container-fluid">
-                <div class="row bg-title">
-                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">Charts</h4> </div>
-                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
-                        <ol class="breadcrumb">
-                            <li><a href="#">Charts</a></li>
-                        </ol>
-                    </div>
-                    <!-- /.col-lg-12 -->
-                </div>
-                <!-- /.row -->
-                <div class="row">
-                    <div class="col-md-12 col-lg-12 col-sm-12 col-xs-12">
-                        <div class="white-box">
-                            <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
-                                <select datatype="text" class="form-control pull-right row b-none" name="street" id="id_street" onchange="updateLine()">
-                                    <option value='all'>--</option>
-                                    {% for street in streets %}
-                                        <option value={{ street }}>{{ street }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <h3 class="box-title">Line</h3>
-                            <div id="line" class="chart-container" style="height: 405px;"></div>
-                            <script>
-                                let line_list = {{ line_charts | safe}};
-                                function updateLine() {
-                                    let street_name = document.getElementById("id_street").value;
-                                    let line_chart = echarts.init(
-                                        document.getElementById('line'), 'white', {renderer: 'svg'}
-                                    );
-                                    line_chart.setOption(JSON.parse(line_list[street_name]));
-                                }
-                                let line_chart = echarts.init(
-                                    document.getElementById('line'), 'white', {renderer: 'svg'}
-                                );
-                                line_chart.setOption(JSON.parse(line_list['all']));
-                            </script>
-                        </div>
-                    </div>
-                </div>
-                <!-- ============================================================== -->
-                <!-- table -->
-                <!-- ============================================================== -->
-                <div class="row">
-                    <div class="col-md-12 col-lg-12 col-sm-12">
-                        <div class="white-box">
-                            <h3 class="box-title">Calendar</h3>
-                            <div id="calendar" class="chart-container" style="height: 350px"></div>
-                            <script>
-                                let calendar_chart = echarts.init(
-                                    document.getElementById('calendar'), 'white', {renderer: 'svg'}
-                                );
-                                calendar_chart.setOption({{ calendar_chart | safe}});
-                            </script>
-                        </div>
-                    </div>
-                </div>
-                <!-- ============================================================== -->
-                <!-- chat-listing & recent comments -->
-                <!-- ============================================================== -->
-                <div class="row">
-                    <!-- .col -->
-                    <div class="col-md-12 col-lg-6 col-sm-12">
-                        <div class="white-box">
-                            <h3 class="box-title">Pie</h3>
-                            <div id="pie" class="chart-container" style="height: 500px;"></div>
-                            <script>
-                                let pie_chart = echarts.init(
-                                    document.getElementById('pie'), 'white', {renderer: 'canvas'}
-                                );
-                                pie_chart.setOption({{ pie_chart | safe}});
-                            </script>
-                        </div>
-                    </div>
-                    <div class="col-md-12 col-lg-6 col-sm-12">
-                        <div class="white-box">
-                            <h3 class="box-title">Sunburst</h3>
-                            <div id="sunburst" class="chart-container" style="height: 500px;"></div>
-                            <script>
-                                let sunburst_chart = echarts.init(
-                                    document.getElementById('sunburst'), 'white', {renderer: 'canvas'}
-                                );
-                                sunburst_chart.setOption({{ sunburst_chart | safe}});
-                            </script>
-                        </div>
-                    </div>
-                    <!-- /.col -->
-                </div>
-            </div>
-            <!-- ============================================================== -->
-            <div class="row">
-                    <!-- .col -->
-                    <div class="col-md-12 col-lg-6 col-sm-12">
-                        <div class="white-box">
-                            <h3 class="box-title">Wordcloud</h3>
-                            <div id="wordcloud" class="chart-container" style="height: 500px;"></div>
-                            <script>
-                                let wordcloud_chart = echarts.init(
-                                    document.getElementById('wordcloud'), 'white', {renderer: 'canvas'}
-                                );
-                                wordcloud_chart.setOption({{ wordcloud_chart | safe}});
-                            </script>
-                        </div>
-                    </div>
-                    <div class="col-md-12 col-lg-6 col-sm-12">
-                        <div class="white-box">
-                            <h3 class="box-title">Map</h3>
-                            <div id="map" class="chart-container" style="height: 500px;"></div>
-                            <script>
-                                let map_chart = echarts.init(
-                                    document.getElementById('map'), 'white', {renderer: 'canvas'}
-                                );
-                                map_chart.setOption({{ map_chart | safe}});
-                            </script>
-                        </div>
-                    </div>
-                    <!-- /.col -->
-                </div>
-            </div>
-            <!-- /.container-fluid -->
-            {% include 'footer.html' %}
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                Charts
+            </h1>
         </div>
-        <!-- ============================================================== -->
-        <!-- End Page Content -->
+        <div class="row">
+            <div class="col-lg-6 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">PIE</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="pie" class="chart-container" style="height: 500px;"></div>
+                        <script>
+                            let pie_chart = echarts.init(
+                                document.getElementById('pie'), 'white', {renderer: 'canvas'}
+                            );
+                            pie_chart.setOption({{ pie_chart | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xl-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Sunburst</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="sunburst" class="chart-container" style="height: 500px;"></div>
+                        <script>
+                            let sunburst_chart = echarts.init(
+                                document.getElementById('sunburst'), 'white', {renderer: 'canvas'}
+                            );
+                            sunburst_chart.setOption({{ sunburst_chart | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Calendar</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="calendar" class="chart-container" style="height: 300px;"></div>
+                        <script>
+                            let calendar_chart = echarts.init(
+                                document.getElementById('calendar'), 'white', {renderer: 'canvas'}
+                            );
+                            calendar_chart.setOption({{ calendar_chart | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock content %}

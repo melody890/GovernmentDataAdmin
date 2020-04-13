@@ -13,21 +13,13 @@ from django.contrib.auth.models import User
 from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm
 from .models import Profile, ConfirmString
 
-
-
-
-def index(request):
-    user = request.user
-    if user.is_authenticated:
-        return redirect(to="chart:charts")
-    else:
-        return redirect(to="user:login")
+from home.views import error_page
 
 
 def user_login(request):
     user = request.user
     if user.is_authenticated:
-        return redirect(to="index")
+        return redirect(to="home:dashboard")
     else:
         if request.method == 'POST':
             user_login_form = UserLoginForm(data=request.POST)
@@ -36,23 +28,24 @@ def user_login(request):
                 user = authenticate(username=data['username'], password=data['password'])
                 if user:
                     login(request, user)
-                    return redirect(to="chart:charts")
+                    return redirect(to="home:dashboard")
                 else:
-                    return HttpResponse("账号或密码输入有误。请重新输入。")
+                    return error_page(request=request, info="账号或密码输入有误。请重新输入。")
             else:
-                return HttpResponse("账号或密码输入不合法")
+                return error_page(request=request, info="账号或密码输入不合法")
         elif request.method == 'GET':
             user_login_form = UserLoginForm()
             context = {'form': user_login_form}
             return render(request, 'user/login.html', context)
         else:
-            return HttpResponse("请使用GET或POST请求数据。")
+            return error_page(request=request, info="请使用GET或POST请求数据。")
 
 
 @login_required(login_url='/user/login/')
 def user_logout(request):
     logout(request)
     return redirect(to="user:login")
+
 
 def user_register(request):
     user = request.user
@@ -71,13 +64,13 @@ def user_register(request):
                 confirm_email('confirm2register',email, code,request.get_host())
                 return HttpResponse("验证邮件已发出，请前往邮箱验证")
             else:
-                return HttpResponse("注册表单有误。请重新输入。")
+                return error_page(request=request, info="注册表单有误。请重新输入。")
         elif request.method == 'GET':
             user_register_form = UserRegisterForm()
             context = {'form': user_register_form}
             return render(request, 'user/register.html', context)
         else:
-            return HttpResponse("请使用GET或POST请求数据。")
+            return error_page(request=request, info="请使用GET或POST请求数据。")
 
 
 @login_required(login_url='/user/login/')
@@ -88,7 +81,7 @@ def user_delete(request, id):
         user.delete()
         return redirect(to="user:login")
     else:
-        return HttpResponse("你没有删除操作的权限。")
+        return error_page(request=request, info="你没有删除操作的权限。")
 
 
 @login_required(login_url='/user/login/')
@@ -102,23 +95,26 @@ def profile_edit(request, id):
 
     if request.method == 'POST':
         if request.user != user:
-            return HttpResponse("您没有权限修改此用户信息。")
+            return error_page(request, "您没有权限修改此用户信息。")
 
         profile_form = ProfileForm(request.POST, request.FILES)
+        print(profile_form)
         if profile_form.is_valid():
             profile_cd = profile_form.cleaned_data
+            print(profile_cd)
             user.username = profile_cd['username']
             profile.phone = profile_cd['phone']
             profile.bio = profile_cd['bio']
 
             if 'avatar' in request.FILES:
                 profile.avatar = profile_cd['avatar']
+
             user.save()
             profile.save()
 
             return redirect("user:edit", id=id)
         else:
-            return HttpResponse("注册表单有误。请重新输入。")
+            return error_page(request, "注册表单有误。请重新输入。")
 
     elif request.method == 'GET':
         profile_form = ProfileForm()
@@ -129,14 +125,16 @@ def profile_edit(request, id):
         }
         return render(request, 'user/edit.html', context)
     else:
-        return HttpResponse("请使用GET或POST请求数据。")
+        return error_page(request, "请使用GET或POST请求数据。")
+
 
 def make_confirm_string(user):
     code = str(uuid4())
     ConfirmString.objects.create(code=code, user=user)
     return code
 
-def confirm_email(mode,email,code,host):
+
+def confirm_email(mode, email, code, host):
 
     text_content = '''这里是政府大数据平台\
                         如果你看到这条消息，说明你的邮箱服务器不提供HTML链接功能，请联系管理员！'''     
@@ -157,17 +155,21 @@ def confirm_email(mode,email,code,host):
                             <p>请点击链接完成重置！</p>
                             <p>此链接有效期为{}天！</p>
                             '''.format(host, code, settings.CONFIRM_DAYS)
+    else:
+        subject = None
+        html_content = ""
 
     msg = EmailMultiAlternatives(subject, text_content, settings.EMAIL_HOST_USER, [email])
     msg.attach_alternative(html_content, "text/html")
 
     msg.send()
 
-def register_confirm(request,code):
+
+def register_confirm(request, code):
     try:
         confirm = ConfirmString.objects.get(code=code)
     except:
-        return HttpResponse('无效的确认请求!')
+        return error_page(request, '无效的确认请求!')
 
     c_time = confirm.c_time
     now = datetime.datetime.now()
@@ -182,6 +184,7 @@ def register_confirm(request,code):
         message = '恭喜您注册成功，赶快尝试登录吧！'
     return HttpResponse(message)
 
+
 def reset_password(request):
     if request.method == 'POST':
         reset_pw_form = ResetForm(data=request.POST)
@@ -191,36 +194,37 @@ def reset_password(request):
             try:
                 user = User.objects.get(username=username)
             except:
-                return HttpResponse("账号不存在")
+                return error_page(request, "账号不存在")
             if email != user.email:
-                return HttpResponse("账号或邮箱输入错误")
+                return error_page(request, "账号或邮箱输入错误")
             code = make_confirm_string(user)
-            confirm_email('confirm2reset',email,code,request.get_host())
+            confirm_email('confirm2reset', email, code, request.get_host())
             return HttpResponse("验证邮件已发送，请往邮箱进行验证")
         else:
-            return HttpResponse("账号或邮箱输入不合法")
+            return error_page(request, "账号或邮箱输入不合法")
     elif request.method == 'GET':
         reset_form = ResetForm()
         context = {'form': reset_form}
         return render(request, 'user/reset.html', context)
     else:
-        return HttpResponse("请使用GET或POST请求数据。")
+        return error_page(request, "请使用GET或POST请求数据。")
 
-def reset_confirm(request,code):
+
+def reset_confirm(request, code):
     try:
         confirm = ConfirmString.objects.get(code=code)
     except:
-        return HttpResponse('无效的确认请求!')
+        return error_page(request, '无效的确认请求!')
 
     if request.method == 'POST':
-        newpassword = request.POST.get('newpassword')
-        confirm.user.set_password(newpassword)
+        new_password = request.POST.get('new_password')
+        confirm.user.set_password(new_password)
         confirm.user.save()
         confirm.delete()
         return HttpResponse('恭喜您重置成功，赶快尝试登录吧！')    
     elif request.method == 'GET':
         reset_pw_form = ResetPwForm()
         context = {'form': reset_pw_form}
-        return render(request, 'user/resetconfirm.html', context)
+        return render(request, 'user/reset_confirm.html', context)
     else:
-        return HttpResponse("请使用GET或POST请求数据。")
+        return error_page(request, "请使用GET或POST请求数据。")

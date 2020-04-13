@@ -1,13 +1,20 @@
 {% load static %}
-<html lang="en">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'plugins/images/favicon.png' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '3Dwordcloud/css/zzsc-demo.css' %}">
+    <meta http-equiv="Content-Language" content="en" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="msapplication-TileColor" content="#2d89ef">
+    <meta name="theme-color" content="#4188c9">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <link rel="icon" href="{% static 'assets/images/icon.png' %}" type="image/x-icon"/>
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/icon.png' %}" />
     <style type="text/css">
         #tag-cloud{
             width:840px;
@@ -16,88 +23,55 @@
         }
     </style>
     <title>Government System</title>
-    <!-- Bootstrap Core CSS -->
-    <link href="{% static 'bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
-    <!-- Menu CSS -->
-    <link href="{% static 'plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.css'%}" rel="stylesheet">
-    <!-- toast CSS -->
-    <link href="{% static 'plugins/bower_components/toast-master/css/jquery.toast.css' %}" rel="stylesheet">
-    <!-- morris CSS -->
-    <link href="{% static 'plugins/bower_components/morrisjs/morris.css' %}" rel="stylesheet">
-    <!-- chartist CSS -->
-    <link href="{% static 'plugins/bower_components/chartist-js/dist/chartist.min.css' %}" rel="stylesheet">
-    <link href="{% static 'plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.css' %}" rel="stylesheet">
-    <!-- animation CSS -->
-    <link href="{% static 'css/animate.css' %}" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="{% static 'css/style.css' %}" rel="stylesheet">
-    <!-- color CSS -->
-    <link href="{% static 'css/colors/default.css' %}" id="theme" rel="stylesheet">
-    <!-- charts-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext">
+    <script src="{% static 'assets/plugins/charts-c3/js/c3.min.js' %}"></script>
+    <script src="{% static 'assets/plugins/charts-c3/js/d3.v3.min.js' %}"></script>
+    <script src="{% static 'assets/js/core.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery-3.2.1.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery.sparkline.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/selectize.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery.tablesorter.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery-jvectormap-2.0.3.min.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery-jvectormap-de-merc.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/jquery-jvectormap-world-mill.js' %}"></script>
+    <script src="{% static 'assets/js/vendors/circle-progress.min.js' %}"></script>
+    <!-- Dashboard Core -->
+    <link href="{% static 'assets/css/dashboard.css' %}" rel="stylesheet" />
+    <script src="{% static 'assets/js/dashboard.js' %}"></script>
+    <!-- c3.js Charts Plugin -->
+    <link href="{% static 'assets/plugins/charts-c3/plugin.css' %}" rel="stylesheet" />
+    <script src="{% static 'assets/plugins/charts-c3/plugin.js' %}"></script>
+    <!-- Google Maps Plugin -->
+    <link href="{% static 'assets/plugins/maps-google/plugin.css' %}" rel="stylesheet" />
+    <script src="{% static 'assets/plugins/maps-google/plugin.js' %}"></script>
+    <!-- Input Mask Plugin -->
+    <script src="{% static 'assets/plugins/input-mask/plugin.js' %}"></script>
+    <!-- Datatables Plugin -->
+    <script src="{% static 'assets/plugins/datatables/plugin.js' %}"></script>
+    <!-- pyecharts-->
     <script src="https://cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script>
     <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
     <script type="text/javascript" src="https://assets.pyecharts.org/assets/bmap.min.js"></script>
     <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts-wordcloud.min.js"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&ak=X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W"></script>
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-<![endif]-->
+    <!--script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/getscript?v=2.0&ak=X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W"></script-->
 </head>
 
-<body class="fix-header">
-    <!-- ============================================================== -->
-    <!-- Preloader -->
-    <!-- ============================================================== -->
-    <div class="preloader">
-        <svg class="circular" viewBox="25 25 50 50">
-            <circle class="path" cx="50" cy="50" r="20" fill="none" stroke-width="2" stroke-miterlimit="10"></circle>
-        </svg>
+<body class="">
+    <div id="page">
+        <div class="flex-fill">
+            <!-- Top_bar header -->
+            {% include 'header.html' %}
+            <!-- End Top Navigation -->
+            <!-- Page Content -->
+            {% block content %}{% endblock content %}
+            <!-- End Page Content -->
+        </div>
+        <!-- Footer -->
+        {% include 'footer.html' %}
+        <!-- End Footer -->
     </div>
-    <!-- ============================================================== -->
-    <!-- Wrapper -->
-    <!-- ============================================================== -->
-    <div id="wrapper">
-        <!-- ============================================================== -->
-        <!-- Top_bar header - style you can find in pages.scss -->
-        <!-- ============================================================== -->
-        {% include 'header.html' %}
-        <!-- End Top Navigation -->
-        <!-- ============================================================== -->
-        <!-- Left Sidebar - style you can find in sidebar.scss  -->
-        <!-- ============================================================== -->
-        {% include 'sidebar.html' %}
-        <!-- ============================================================== -->
-        <!-- Page Content -->
-        <!-- ============================================================== -->
-        {% block content %}{% endblock content %}
-    </div>
-    <!-- ============================================================== -->
-    <!-- All Jquery -->
-    <!-- ============================================================== -->
-    <script src="{% static 'plugins/bower_components/jquery/dist/jquery.min.js' %}"></script>
-    <!-- Bootstrap Core JavaScript -->
-    <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script>
-    <!-- Menu Plugin JavaScript -->
-    <script src="{% static 'plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js' %}"></script>
-    <!--slimscroll JavaScript -->
-    <script src="{% static 'js/jquery.slimscroll.js' %}"></script>
-    <!--Wave Effects -->
-    <script src="{% static 'js/waves.js' %}"></script>
-    <!--Counter js -->
-    <script src="{% static 'plugins/bower_components/waypoints/lib/jquery.waypoints.js' %}"></script>
-    <script src="{% static 'plugins/bower_components/counterup/jquery.counterup.min.js' %}"></script>
-    <!-- chartist chart -->
-    <script src="{% static 'plugins/bower_components/chartist-js/dist/chartist.min.js' %}"></script>
-    <script src="{% static 'plugins/bower_components/chartist-plugin-tooltip-master/dist/chartist-plugin-tooltip.min.js' %}"></script>
-    <!-- Sparkline chart JavaScript -->
-    <script src="{% static 'plugins/bower_components/jquery-sparkline/jquery.sparkline.min.js' %}"></script>
-    <!-- Custom Theme JavaScript -->
-    <script src="{% static 'js/custom.min.js' %}"></script>
-    <script src="{% static 'js/dashboard1.js' %}"></script>
-    <script src="{% static 'plugins/bower_components/toast-master/js/jquery.toast.js' %}"></script>
     {% block script %}{% endblock script %}
 </body>

@@ -11,7 +11,6 @@ from pyecharts.datasets import register_url
 
 from event.models import Event, Street, Type, Property, Achieve, DisposeUnit, Community, EventSource, MainType
 
-
 BAIDU_MAP_AK = 'X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W'
 
 
@@ -23,7 +22,7 @@ def get_date(days):
 def get_recent_date(num):
     date_list = []
     for i in range(num):
-        day = get_date(num-i+20)
+        day = get_date(num - i + 20)
 
         date_list.append(day)
 
@@ -87,12 +86,12 @@ class Charts:
         data = self.get_sunburst_data()
         c = (
             Sunburst()
-            .add(series_name="", data_pair=data, radius=[0, "90%"])
-            .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}"))
-            .dump_options_with_quotes()
+                .add(series_name="", data_pair=data, radius=[0, "90%"])
+                .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}"))
+                .dump_options_with_quotes()
         )
         end = datetime.datetime.now()
-        print("Sunburst: " + str(end-start))
+        print("Sunburst: " + str(end - start))
         return c
 
     def get_word_data(self):
@@ -123,8 +122,8 @@ class Charts:
         words = self.get_word_data()
         c = (
             WordCloud()
-            .add("", words, word_size_range=[20, 80], shape=SymbolType.DIAMOND)
-            .dump_options_with_quotes()
+                .add("", words, word_size_range=[20, 80], shape=SymbolType.DIAMOND)
+                .dump_options_with_quotes()
         )
         end = datetime.datetime.now()
         print("Wordcloud: " + str(end - start))
@@ -146,9 +145,9 @@ class Charts:
 
         c = (
             Pie()
-            .add("", [list(z) for z in zip(data, data_value)])
-            .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
-            .dump_options_with_quotes()
+                .add("", [list(z) for z in zip(data, data_value)])
+                .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+                .dump_options_with_quotes()
         )
         end = datetime.datetime.now()
         print("Pie: " + str(end - start))
@@ -195,7 +194,7 @@ class Charts:
             info = self.get_line_all(date_list, info)
         c = (
             Line()
-            .add_xaxis(date_list)
+                .add_xaxis(date_list)
         )
         for key in info.keys():
             c.add_yaxis(key, info[key], is_smooth=True)
@@ -230,7 +229,7 @@ class Charts:
         start = datetime.datetime.now()
 
         begin = get_date(365)
-        end = datetime.date.today()-timedelta(days=465)
+        end = datetime.date.today() - timedelta(days=465)
         data = []
         cur_day = end
         count = 0
@@ -250,7 +249,12 @@ class Charts:
             Calendar()
             .add("",
                  data,
-                 calendar_opts=opts.CalendarOpts(range_=[begin, end])
+                 calendar_opts=opts.CalendarOpts(
+                     range_=[begin, end],
+                     daylabel_opts=opts.CalendarDayLabelOpts(name_map="cn"),
+                     monthlabel_opts=opts.CalendarMonthLabelOpts(name_map="cn"),
+                     pos_right="20px"
+                 ),
                  )
             .set_global_opts(
                 visualmap_opts=opts.VisualMapOpts(
@@ -258,8 +262,7 @@ class Charts:
                     min_=1,
                     orient="horizontal",
                     is_piecewise=True,
-                    pos_top="230px",
-                    pos_left="100px",
+                    pos_left="40px"
                 ),
             )
             .dump_options_with_quotes()

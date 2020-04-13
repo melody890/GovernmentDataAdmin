@@ -15,7 +15,7 @@ class Profile(models.Model):
 class ConfirmString(models.Model):
  
    code = models.CharField(max_length=256)
-   user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='confirmstring')
+   user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='confirm_string')
    c_time = models.DateTimeField(auto_now_add=True)
 
    def __str__(self):

@@ -16,7 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.conf.urls import include
 from django.urls import path
-from user.views import index
+from django.conf.urls.static import static
+from django.conf import settings
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,5 +26,7 @@ urlpatterns = [
     path('event/', include('event.urls', namespace='event')),
     path('user/', include('user.urls', namespace='user')),
     path('kgraph/', include('kgraph.urls', namespace='kgraph')),
-    path('', index, name='index')
+    path('', include('home.urls', namespace='home')),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
