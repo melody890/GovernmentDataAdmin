@@ -1,5 +1,105 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="row row-cards">
+            <div class="col-sm-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h3 class="mb-1">423</h3>
+                        <div class="text-muted">今日登记事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="chart-bg-users-4" style="height: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="card">
+                    <div class="card-body p-3 text-center">
+                        <div class="text-right text-green">
+                            6%
+                            <i class="fe fe-chevron-up"></i>
+                        </div>
+                        <div class="h1 m-0">43</div>
+                        <div class="text-muted mb-4">今日登记事件</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-sm-4 col-lg-2">
+                <div class="card">
+                    <div class="card-body p-3 text-center">
+                        <div class="text-right text-red">
+                            -6%
+                            <i class="fe fe-chevron-down"></i>
+                        </div>
+                        <div class="h1 m-0">17</div>
+                        <div class="text-muted mb-4">今日处理事件</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">实时事件列表</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter text-nowrap datatable">
+                            <thead>
+                            <tr>
+                                <th class="w-1">No.</th>
+                                <th>统计时间</th>
+                                <th>所属街道和社区</th>
+                                <th>问题性质</th>
+                                <th>问题类型</th>
+                                <th>问题来源</th>
+                                <th>处置状态</th>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><span class="text-muted">001401</span></td>
+                                <td><a href="invoice.html" class="text-inherit">Design Works</a></td>
+                                <td>
+                                    Carlson Limited
+                                </td>
+                                <td>
+                                    87956621
+                                </td>
+                                <td>
+                                    15 Dec 2017
+                                </td>
+                                <td>
+                                    <span class="status-icon bg-success"></span> Paid
+                                </td>
+                                <td>$887</td>
+                                <td class="text-right">
+                                    <a href="javascript:void(0)" class="btn btn-secondary btn-sm">Manage</a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-secondary btn-sm dropdown-toggle" data-toggle="dropdown">Actions</button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a class="icon" href="javascript:void(0)">
+                                        <i class="fe fe-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <script>
+                            require(['datatables', 'jquery'], function(datatable, $) {
+                                $('.datatable').DataTable();
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}

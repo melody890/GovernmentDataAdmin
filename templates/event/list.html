@@ -86,13 +86,13 @@
                         <td>{{ event.sub_type }}</td>
                         <td>{{ event.event_src }}</td>
                         {% if event.achieve.status == 'intime_to' %}
-                            <td class="achieve">处理中</td>
+                            <td class="achieve"><span class="status-icon bg-primary"></span>处理中</td>
                             <td class="status"><button class="btn btn-info btn-sm" onclick="dispose('intime', '{{ event.rec_id }}')">按期</button>&nbsp;&nbsp;<button class="btn btn-danger btn-sm" onclick="dispose('overtime', '{{ event.rec_id }}')"><i class="ti-close text-danger m-r-5"></i>逾期</button></td>
                         {% elif event.achieve.status == 'intime' %}
-                            <td class>按期办结</td>
+                            <td class><span class="status-icon bg-success"></span>按期办结</td>
                             <td></td>
                         {% elif event.achieve.status == 'overtime' %}
-                            <td>逾期办结</td>
+                            <td><span class="status-icon bg-danger"></span>逾期办结</td>
                             <td></td>
                         {% endif %}
                     </tr>

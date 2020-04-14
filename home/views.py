@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/user/login/')
 def dashboard(request):
+
     context = {
         'cur_page': "dashboard"
     }
