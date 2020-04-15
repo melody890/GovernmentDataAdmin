@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'event',
     'user',
     'kgraph',
+    'home',
 ]
 
 MIDDLEWARE = [

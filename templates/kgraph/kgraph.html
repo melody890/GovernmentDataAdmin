@@ -1,124 +1,81 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-        <!-- Page Content -->
-        <!-- ============================================================== -->
-        <div id="page-wrapper">
-            <div class="container-fluid">
-                <div class="row bg-title">
-                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">Kgraph</h4>
-                    </div>
-                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
-                        <ol class="breadcrumb">
-                            <li class="active">Kgraph</li>
-                        </ol>
-                    </div>
-                    <!-- /.col-lg-12 -->
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="white-box">
-                            <div style="width: 200px; align-self: center">
-                                <form role="search" method="GET" class="app-search hidden-sm hidden-xs m-r-10">
-                                    {% if kg_search %}
-                                        <input type="text" name="search" id="kgsearch_id" class="form-control" value="{{ kg_search }}" required>
-                                    {% else %}
-                                        <label for="kgsearch_id"></label>
-                                        <input type="text" name="search" id="kgsearch_id" placeholder="Search..." class="form-control" required>
-                                    {% endif %}
-                                    <a>
-                                        <i class="fa fa-search" onclick="kgsearch()"></i>
-                                        <script type="text/javascript">
-                                            function kgsearch() {
-                                                let searchBar = document.getElementById("kgsearch_id");
-                                                self.location.href = "http://" + self.location.host + "/kgraph?search=" + searchBar.value;
+<div class="my-2 my-md-2">
+    <div class="container">
+        {% if page == "graph" %}
+            <div id="graph" class="chart-container" style="height: 700px;"></div>
+            <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.9.0/jquery.min.js"></script>
+            <script type="text/javascript">
+                let graph_chart = echarts.init(
+                    document.getElementById('graph'), 'white', {renderer: 'canvas'}
+                );
+                graph_chart.setOption({{ graph | safe}});
+                graph_chart.on('click',function(params){
+                    if (params.seriesType ==='wordCloud'){
+                        self.location.href="http://" + self.location.host + "/kgraph?search=" + params.name;
+                    }
+                    else {
+                        let option = graph_chart.getOption();
+                        let nodesOption = option.series[0].data;
+                        let linksOption = option.series[0].links;
+                        let categoriesOption = option.series[0].categories;
+                        let name = params.name;
+
+                        $.ajax({
+                            url:'http://'+self.location.host+'/kgraph/add/',
+                            type:'GET',
+                            data:{'uname':params.name},
+                            success:function(result){
+                                let jaGraph = JSON.parse(result.graph);
+                                let newNodes = jaGraph.series[0].data;
+                                let newLinks = jaGraph.series[0].links;
+                                let newCategories = jaGraph.series[0].categories;
+
+                                for(let i = 0; i <newLinks.length; i++){
+                                    linksOption.push(newLinks[i]);
+                                }
+                                let cateNum = categoriesOption.length;
+                                for(let i = 0; i <newCategories.length; i++){
+                                    categoriesOption.push(newCategories[i]);
+                                }
+                                for(let i = 0; i <newNodes.length; i++){
+                                    let befCate = newNodes[i].category;
+                                    newNodes[i].category = befCate+cateNum;
+                                }
+                                function addNew(arr1,arr2) {
+                                    for (let i = 0; i < arr1.length; i++) {
+                                        for (let j = 0; j < arr2.length; j++) {
+                                            if (arr1[i].name === arr2[j].name) {
+                                                arr2.splice(j, 1);
                                             }
-                                        </script>
-                                    </a>
-                                </form>
-                            </div>
-                        {% if page == "graph" %}
-                            <div id="graph" class="chart-container" style="height: 800px;"></div>
-                            <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/1.9.0/jquery.min.js"></script>
-
-                            <script type="text/javascript">
-                                let graph_chart = echarts.init(
-                                    document.getElementById('graph'), 'white', {renderer: 'canvas'}
-                                );
-                                graph_chart.setOption({{ graph | safe}});
-                                graph_chart.on('click',function(params){
-                                    if (params.seriesType ==='wordCloud'){
-                                        self.location.href="http://" + self.location.host + "/kgraph?search=" + params.name;
+                                        }
                                     }
-                                    else {
-                                        let option = graph_chart.getOption();
-                                        let nodesOption = option.series[0].data;
-                                        let linksOption = option.series[0].links;
-                                        let categoriesOption = option.series[0].categories;
-                                        let name = params.name;
-
-                                        $.ajax({
-                                            url:'http://'+self.location.host+'/kgraph/add/',
-                                            type:'GET',
-                                            data:{'uname':params.name},
-                                            success:function(result){
-                                                let jaGraph = JSON.parse(result.graph);
-                                                let newNodes = jaGraph.series[0].data;
-                                                let newLinks = jaGraph.series[0].links;
-                                                let newCategories = jaGraph.series[0].categories;
-
-                                                for(let i = 0; i <newLinks.length; i++){
-                                                    linksOption.push(newLinks[i]);
-                                                }
-                                                let cateNum = categoriesOption.length;
-                                                for(let i = 0; i <newCategories.length; i++){
-                                                    categoriesOption.push(newCategories[i]);
-                                                }
-                                                for(let i = 0; i <newNodes.length; i++){
-                                                    let befCate = newNodes[i].category;
-                                                    newNodes[i].category = befCate+cateNum;
-                                                }
-                                                function addNew(arr1,arr2) {
-                                                    for (let i = 0; i < arr1.length; i++) {
-                                                        for (let j = 0; j < arr2.length; j++) {
-                                                            if (arr1[i].name === arr2[j].name) {
-                                                                arr2.splice(j, 1);
-                                                            }
-                                                        }
-                                                    }
-                                                    for (let i = 0; i < arr2.length; i++) {
-                                                        arr1.push(arr2[i]);
-                                                    }
-                                                }
-                                                nodesOption = addNew(nodesOption,newNodes);
-                                                let lgData = option.legend[0].data;
-                                                let newLgData = jaGraph.legend[0].data;
-                                                let lgSel = option.legend[0].selected;
-                                                let newLgSel = jaGraph.legend[0].selected;
-                                                for(let i = 0; i <newLgData.length; i++){
-                                                    lgData.push(newLgData[i]);
-                                                }
-                                                graph_chart.setOption(option);
-                                            },
-                                        });
+                                    for (let i = 0; i < arr2.length; i++) {
+                                        arr1.push(arr2[i]);
                                     }
-                                });
-                            </script>
-                        {% else %}
-                            <div class="zzsc-container">
-                                <div id='tag-cloud'></div>
-                            </div>
-                        {% endif %}
-                        </div>
-                    </div>
-                </div>
+                                }
+                                nodesOption = addNew(nodesOption,newNodes);
+                                let lgData = option.legend[0].data;
+                                let newLgData = jaGraph.legend[0].data;
+                                let lgSel = option.legend[0].selected;
+                                let newLgSel = jaGraph.legend[0].selected;
+                                for(let i = 0; i <newLgData.length; i++){
+                                    lgData.push(newLgData[i]);
+                                }
+                                graph_chart.setOption(option);
+                            },
+                        });
+                    }
+                });
+            </script>
+        {% else %}
+            <div class="zzsc-container">
+                <div id='tag-cloud'></div>
             </div>
-            <!-- /.container-fluid -->
-            {% include 'footer.html' %}
-        </div>
-        <!-- ============================================================== -->
-        <!-- End Page Content -->
+        {% endif %}
+    </div>
+</div>
 {% endblock content %}
 
 {% block script %}
@@ -140,7 +97,7 @@
                 radius: '72%',
                 radiusMin: 75,
                 bgDraw: true,
-                bgColor: 'white',
+                bgColor: 'transparent',
                 opacityOver: 1.00,
                 opacityOut: 0.05,
                 opacitySpeed: 6,

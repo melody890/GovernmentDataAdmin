@@ -1,103 +1,87 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-        <!-- Page Content -->
-        <!-- ============================================================== -->
-        <div id="page-wrapper">
-            <div class="container-fluid">
-                <div class="row bg-title">
-                    <div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
-                        <h4 class="page-title">Profile</h4>
-                    </div>
-                    <div class="col-lg-9 col-sm-8 col-md-8 col-xs-12">
-                        <ol class="breadcrumb">
-                            <li><a href="#">Profile</a></li>
-                        </ol>
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card card-profile">
+                    <div class="card-header" style="background-image: url({% static 'assets/images/profile-back.jpg' %});"></div>
+                    <div class="card-body text-center">
+                        {% if profile.avatar %}
+                        <img class="card-profile-img" src="{{ profile.avatar.url }}" alt="avatar">
+                        {% else %}
+                        <img class="card-profile-img" src="{% static 'assets/images/admin.png' %}" alt="profile-background">
+                        {% endif %}
+                        <h3 class="mb-3">{{ profile.user.username }}</h3>
+                        <h4 class="mb-3">{{ profile.user.email }}</h4>
+                        <p class="mb-4">{{ profile.bio }}</p>
                     </div>
                 </div>
-                <!-- /.row -->
-                <!-- .row -->
-                <div class="row">
-                    <form class="form-horizontal form-material" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="col-md-4 col-xs-12">
-                            <div class="white-box">
-                                <div class="user-bg">
-                                    <div class="overlay-box">
-                                        <div class="user-content">
-                                            <a  href="#" aria-label="Change your avatar">
-                                            {% if profile.avatar %}
-                                                <img src="{{ profile.avatar.url }}" class="thumb-lg img-circle" alt="img">
-                                            {% else %}
-                                                <img src="{% static 'plugins/images/users/admin.png' %}" class="thumb-lg img-circle" alt="img" onclick="">
-                                            {% endif %}
-                                            </a>
-                                            <h4 class="text-white">{{ profile.user.username }}</h4>
-                                            <h5 class="text-white">{{ profile.user.email }}</h5>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="user-btm-box">
-                                    <div class="col-md-4 col-sm-4 text-center">
-                                        <p class="text-purple"><i class="ti-facebook"></i></p>
-                                        <h1>258</h1>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4 text-center">
-                                        <p class="text-blue"><i class="ti-twitter"></i></p>
-                                        <h1>125</h1>
-                                    </div>
-                                    <div class="col-md-4 col-sm-4 text-center">
-                                        <p class="text-danger"><i class="ti-dribbble"></i></p>
-                                        <h1>556</h1>
-                                    </div>
+                <form class="card" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                    <div class="card-body">
+                    <h3 class="card-title">编辑资料</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="username">姓名</label>
+                                <div class="input-icon">
+                                    <span class="input-icon-addon">
+                                        <i class="fe fe-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value="{{ profile.user.username }}" id="username" name="username">
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-8 col-xs-12">
-                            <div class="white-box">
-                                <div class="form-group">
-                                    <label for="username" class="col-md-12">Name</label>
-                                    <div class="col-md-12">
-                                        <input type="text" value="{{ profile.user.username }}" class="form-control form-control-line" id="username" name="username">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="avatar" class="col-md-12">Avatar</label>
-                                    <div class="col-md-12">
-                                        <input type="file" class="form-control form-control-line" id="avatar" name="avatar">
-                                    </div>
-                                </div>
-                                <!-- <div class="form-group">
-                                    <label for="email" class="col-md-12">Email</label>
-                                    <div class="col-md-12">
-                                        <input type="email" value= "{{ profile.user.email }}" class="form-control form-control-line" id="email" name="email">
-                                    </div>
-                                </div> -->
-                                <div class="form-group">
-                                    <label class="col-md-12" for="phone">Phone</label>
-                                    <div class="col-md-12">
-                                        <input type="text" value="{{ profile.phone }}" class="form-control form-control-line" id="phone" name="phone">
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label for="bio" class="col-md-12">Message</label>
-                                    <div class="col-md-12">
-                                        <textarea type="text" rows="2" class="form-control form-control-line" id="bio" name="bio">{{ profile.bio }}</textarea>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 col-lg-6 col-sm-12">
-                                        <button class="btn btn-success" style="">Update Profile</button>
-                                    </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label" for="avatar">头像</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="avatar" id="avatar" {% if profile.avatar %} value="{{ user.profile.avatar.url }}" {% endif %}>
+                                    <label class="custom-file-label">选择图片</label>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-                <!-- /.row -->
+                        <div class="col-sm-6 col-md-12">
+                            <div class="form-group">
+                                <label class="form-label" for="email">电子邮箱</label>
+                                <div class="input-icon">
+                                    <span class="input-icon-addon">
+                                        <i class="fe fe-mail"></i>
+                                    </span>
+                                    <input type="email" class="form-control" value="{{ profile.user.email }}" id="email" name="email">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-12">
+                            <div class="form-group">
+                                <label class="form-label" for="phone">电话号码</label>
+                                <div class="input-icon">
+                                    <span class="input-icon-addon">
+                                        <i class="fe fe-phone"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value="{{ profile.phone }}" id="phone" name="phone">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group mb-0">
+                                <label class="form-label" for="bio">关于我</label>
+                                <textarea rows="5" class="form-control" id="bio" name="bio">{{ profile.bio }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    <div class="card-footer text-right">
+                        <button class="btn btn-primary">更新信息</button>
+                    </div>
+                </form>
             </div>
-            <!-- /.container-fluid -->
-            {% include 'footer.html' %}
+            <div class="col-lg-8">
+
+            </div>
         </div>
-        <!-- /#page-wrapper -->
+    </div>
+</div>
 {% endblock content %}
