@@ -6,8 +6,7 @@ from datetime import timedelta, date
 from pyecharts.charts import Sunburst, BMap, Line, WordCloud, Pie, Calendar
 from pyecharts.faker import Faker
 from pyecharts import options as opts
-from pyecharts.globals import SymbolType, GeoType
-from pyecharts.datasets import register_url
+from pyecharts.globals import SymbolType, GeoType, ThemeType
 
 from event.models import Event, Street, Type, Property, Achieve, DisposeUnit, Community, EventSource, MainType
 
@@ -144,10 +143,10 @@ class Charts:
             data_value.append(pro.number)
 
         c = (
-            Pie()
-                .add("", [list(z) for z in zip(data, data_value)])
-                .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
-                .dump_options_with_quotes()
+            Pie(init_opts=opts.InitOpts(theme=ThemeType.WESTEROS))
+            .add("", [list(z) for z in zip(data, data_value)])
+            .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+            .dump_options_with_quotes()
         )
         end = datetime.datetime.now()
         print("Pie: " + str(end - start))
@@ -194,7 +193,7 @@ class Charts:
             info = self.get_line_all(date_list, info)
         c = (
             Line()
-                .add_xaxis(date_list)
+            .add_xaxis(date_list)
         )
         for key in info.keys():
             c.add_yaxis(key, info[key], is_smooth=True)

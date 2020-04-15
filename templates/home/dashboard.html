@@ -12,34 +12,66 @@
                         <div class="text-muted">今日登记事件</div>
                     </div>
                     <div class="card-chart-bg">
-                        <div id="chart-bg-users-4" style="height: 100%"></div>
+                        <div id="post-chart" style="height: 90%"></div>
+                        <script>
+                            let post_chart = echarts.init(
+                                document.getElementById('post-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            post_chart.setOption({{ post_line | safe}});
+                        </script>
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-sm-4 col-lg-2">
+            <div class="col-sm-6 col-lg-3">
                 <div class="card">
-                    <div class="card-body p-3 text-center">
-                        <div class="text-right text-green">
-                            6%
-                            <i class="fe fe-chevron-up"></i>
-                        </div>
-                        <div class="h1 m-0">43</div>
-                        <div class="text-muted mb-4">今日登记事件</div>
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h3 class="mb-1">423</h3>
+                        <div class="text-muted">今日处置事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="dispose-chart" style="height: 100%"></div>
+                        <script>
+                            let dispose_chart = echarts.init(
+                                document.getElementById('dispose-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            dispose_chart.setOption({{ dispose_line | safe}});
+                        </script>
                     </div>
                 </div>
             </div>
-            <div class="col-6 col-sm-4 col-lg-2">
-                <div class="card">
-                    <div class="card-body p-3 text-center">
-                        <div class="text-right text-red">
-                            -6%
-                            <i class="fe fe-chevron-down"></i>
+            <!-- 图表 -->
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">今日事件性质</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="pie-chart" style="height: 12rem;"></div>
+                                <script>
+                                    let pie_chart = echarts.init(
+                                        document.getElementById('pie-chart'), 'white', {renderer: 'canvas'}
+                                        );
+                                    pie_chart.setOption({{ pie_chart | safe}});
+                                </script>
+                            </div>
                         </div>
-                        <div class="h1 m-0">17</div>
-                        <div class="text-muted mb-4">今日处理事件</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Chart title</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-pie" style="height: 12rem;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+            <!-- 实时事件列表 -->
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
