@@ -40,6 +40,7 @@ def get_kgraph(request):
         'graph': kgraph,
         'kg_search': search,
         "page": page,
+        'cur_page': "kgraph",
     }
     return render(request, 'kgraph/kgraph.html', context)
 
@@ -663,7 +664,7 @@ def wordcloud():
 
     c = (
         WordCloud()
-        .add(series_name= "wordcloud", data_pair=data, word_size_range=[20, 200])
+        .add(series_name="wordcloud", data_pair=data, word_size_range=[20, 200])
         .set_global_opts(
             title_opts=opts.TitleOpts(
                 title='', title_textstyle_opts=opts.TextStyleOpts(font_size=23)

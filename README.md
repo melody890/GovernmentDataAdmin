@@ -6,11 +6,13 @@
 GovernmentDataAdmin/
 	chart/ 	# 可视化app
 	DataAdmin/ # 设置
-	event/ 	# 事件登记处理app
+	event/ 	# 事件登记处理app  
+        home/   #主页app
 	kgraph/ # 知识图谱app
 	static/ # 静态文件
 		chart/	# 对应app的html文件
 		event/
+                home/   # 主页及通用视图   
 		kgraph/
 		user/
 		base.html	# 基本模板
