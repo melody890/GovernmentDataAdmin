@@ -61,7 +61,7 @@ def user_register(request):
                 new_user.save()
                 email = request.POST.get('email')
                 code = make_confirm_string(new_user)
-                confirm_email('confirm2register',email, code,request.get_host())
+                confirm_email('confirm2register',email, code,request.get_host(), new_user.username)
                 return HttpResponse("验证邮件已发出，请前往邮箱验证")
             else:
                 return error_page(request=request, info="注册表单有误。请重新输入。")
@@ -134,27 +134,33 @@ def make_confirm_string(user):
     return code
 
 
-def confirm_email(mode, email, code, host):
+def confirm_email(mode, email, code, host, username):
 
     text_content = '''这里是政府大数据平台\
                         如果你看到这条消息，说明你的邮箱服务器不提供HTML链接功能，请联系管理员！'''     
 
     if mode == 'confirm2register':
-        subject = '来自政府大数据平台的注册确认邮件'        
+        subject = '请完成政府大数据平台的注册确认'
         html_content = '''
-                            <p>感谢注册<a href="http://{}/user/register/confirm/{}" target=blank>验证链接</a>，\
-                            这里是政府大数据可视化平台！</p>
-                            <p>请点击链接完成注册！</p>
-                            <p>此链接有效期为{}天！</p>
-                            '''.format(host, code, settings.CONFIRM_DAYS)
+                            <p style="text-align:center">亲爱的{}, 你好!</p>
+                            <p style="text-align:center">政府大数据平台已经收到您的注册信息，恭喜你注册成功，请点击以下的链接完成注册吧</p>
+                            <p style="text-align:center"><a href="http://{}/user/register/confirm/{}" target=blank>完成注册，开始政府数据可视化体验吧</a></p>
+                            <p style="text-align:center">如果不能无法点击链接，请将下列链接复制粘贴到浏览器输入栏</p> 
+                            <p style="text-align:center">http://{}/user/register/confirm/{}</p>
+                            <p style="text-align:center">此链接有效期为{}天</p>
+                            <p style="text-align:center;color:grey;">来自政府大数据可视化平台</p>
+                            '''.format(username, host, code, host, code, settings.CONFIRM_DAYS)
     elif mode == 'confirm2reset':
-        subject = '来自政府大数据平台的密码重置确认邮件'
+        subject = '请完成政府大数据平台的密码重置'
         html_content = '''
-                            <p>验证成功<a href="http://{}/user/reset/confirm/{}" target=blank>验证链接</a>，\
-                            这里是政府大数据可视化平台！</p>
-                            <p>请点击链接完成重置！</p>
-                            <p>此链接有效期为{}天！</p>
-                            '''.format(host, code, settings.CONFIRM_DAYS)
+                            <p style="text-align:center">亲爱的{}, 你好!</p>
+                            <p style="text-align:center">政府大数据平台已经收到您的重置请求，恭喜你验证成功，请点击以下的链接完成重置吧</p>
+                            <p style="text-align:center"><a href="http://{}/user/reset/confirm/{}" target=blank>完成重置，重新开始政府数据可视化体验吧</a></p>
+                            <p style="text-align:center">如果不能无法点击链接，请将下列链接复制粘贴到浏览器输入栏</p> 
+                            <p style="text-align:center">http://{}/user/reset/confirm/{}</p>
+                            <p style="text-align:center">此链接有效期为{}天</p>
+                            <p style="text-align:center;color:grey;">来自政府大数据可视化平台</p>
+                            '''.format(username, host, code, host, code, settings.CONFIRM_DAYS)
     else:
         subject = None
         html_content = ""
@@ -198,7 +204,7 @@ def reset_password(request):
             if email != user.email:
                 return error_page(request, "账号或邮箱输入错误")
             code = make_confirm_string(user)
-            confirm_email('confirm2reset', email, code, request.get_host())
+            confirm_email('confirm2reset', email, code, request.get_host(), username)
             return HttpResponse("验证邮件已发送，请往邮箱进行验证")
         else:
             return error_page(request, "账号或邮箱输入不合法")
@@ -217,14 +223,14 @@ def reset_confirm(request, code):
         return error_page(request, '无效的确认请求!')
 
     if request.method == 'POST':
-        new_password = request.POST.get('new_password')
-        confirm.user.set_password(new_password)
+        newpassword = request.POST.get('newpassword')
+        confirm.user.set_password(newpassword)
         confirm.user.save()
         confirm.delete()
         return HttpResponse('恭喜您重置成功，赶快尝试登录吧！')    
     elif request.method == 'GET':
         reset_pw_form = ResetPwForm()
         context = {'form': reset_pw_form}
-        return render(request, 'user/reset_confirm.html', context)
+        return render(request, 'user/resetconfirm.html', context)
     else:
         return error_page(request, "请使用GET或POST请求数据。")
