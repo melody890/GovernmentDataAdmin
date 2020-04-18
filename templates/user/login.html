@@ -65,7 +65,11 @@
                         <div class="text-center text-muted">
                             还没有账号吗? 点击<a href="{% url 'user:register' %}">注册</a>
                         </div>
-                    </div>
+                        <div class="text-center text-muted">
+                             <span>第三方账号登录：</span>
+                             <a href="{% url 'social:begin' 'github' %}" title="Github登录">Github</a>
+                            </div>
+                        </div>
                 </div>
             </div>
         </div>
