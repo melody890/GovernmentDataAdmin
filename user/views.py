@@ -225,7 +225,6 @@ def reset_confirm(request, code):
     if request.method == 'POST':
         newpassword = request.POST.get('newpassword')
         confirm.user.set_password(newpassword)
-        print(newpassword)
         confirm.user.save()
         confirm.delete()
         return HttpResponse('恭喜您重置成功，赶快尝试登录吧！')    
