@@ -4,7 +4,7 @@
 <div class="my-3 my-md-5">
     <div class="container">
         <div class="row row-cards">
-            <div class="col-sm-6 col-lg-3">
+            <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body">
                         <div class="card-value float-right text-yellow">9%</div>
@@ -22,7 +22,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-6 col-lg-3">
+            <div class="col-md-6 col-lg-3">
                 <div class="card">
                     <div class="card-body">
                         <div class="card-value float-right text-yellow">9%</div>
@@ -71,6 +71,41 @@
                     </div>
                 </div>
             </div>
+            {#最近事件统计图#}
+            <div class="col-md-6 col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Line</h3>
+                    </div>
+                    <div  class="white-box">
+                        <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                            <select datatype="text" class="form-control pull-right row b-none" name="street" id="id_street" onchange="updateLine()">
+                                <option value='all'>--</option>
+                                {% for street in streets %}
+                                    <option value={{ street }}>{{ street }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="line" class="chart-container" style="height: 405px;"></div>
+                        <script>
+                            let line_list = {{ line_charts | safe}};
+                                function updateLine() {
+                                    let street_name = document.getElementById("id_street").value;
+                                    let line_chart = echarts.init(
+                                        document.getElementById('line'), 'white', {renderer: 'svg'}
+                                    );
+                                    line_chart.setOption(JSON.parse(line_list[street_name]));
+                                }
+                                let line_chart = echarts.init(
+                                    document.getElementById('line'), 'white', {renderer: 'svg'}
+                                );
+                                line_chart.setOption(JSON.parse(line_list['all']));
+                        </script>
+                    </div>
+                </div>
+            </div>
             <!-- 实时事件列表 -->
             <div class="col-12">
                 <div class="card">
@@ -81,7 +116,6 @@
                         <table class="table card-table table-vcenter text-nowrap datatable">
                             <thead>
                             <tr>
-                                <th class="w-1">No.</th>
                                 <th>统计时间</th>
                                 <th>所属街道和社区</th>
                                 <th>问题性质</th>
