@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import notifications.urls
+
 from django.contrib import admin
 from django.conf.urls import include
 from django.urls import path
@@ -28,6 +30,8 @@ urlpatterns = [
     path('kgraph/', include('kgraph.urls', namespace='kgraph')),
     path('', include('home.urls', namespace='home')),
     path('login/github/', include('social_django.urls', namespace='social')),
+    path('notifications/', include(notifications.urls, namespace='notifications')),
+    path('notice/', include('notice.urls', namespace='notice')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
