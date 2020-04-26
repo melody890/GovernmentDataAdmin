@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'kgraph',
     'home',
     'social_django',
+    'notifications',
+    'notice',
 ]
 
 MIDDLEWARE = [
