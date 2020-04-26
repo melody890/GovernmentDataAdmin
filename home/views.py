@@ -5,7 +5,8 @@ from pyecharts.charts import Pie, Line
 from pyecharts.faker import Faker
 from pyecharts import options as opts
 
-from event.models import Property
+from event.models import Property, Street
+from chart.charts import Charts
 
 
 @login_required(login_url='/user/login/')
@@ -13,9 +14,13 @@ def dashboard(request):
     pie = index_pie()
     post_chart = post_line()
     dispose_chart = dispose_line()
+    charts = Charts()
+    streets = Street.objects.all()
     context = {
+        'streets': streets,
         'cur_page': "dashboard",
         'pie_chart': pie,
+        'line_charts': charts.get_line(),#最近事件曲线图
         'post_line': post_chart,
         'dispose_line': dispose_chart,
     }
