@@ -32,6 +32,7 @@ urlpatterns = [
     path('login/github/', include('social_django.urls', namespace='social')),
     path('notifications/', include(notifications.urls, namespace='notifications')),
     path('notice/', include('notice.urls', namespace='notice')),
+    path('webinfo/', include('webinfo.urls', namespace='webinfo')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
