@@ -9,4 +9,7 @@ urlpatterns = [
     path('register/', views.user_register, name='register'),
     path('delete/<int:id>/', views.user_delete, name='delete'),
     path('edit/<int:id>/', views.profile_edit, name='edit'),
+    path('register/confirm/<str:code>', views.register_confirm, name='confirm2register'),
+    path('reset/', views.reset_password, name='reset'),
+    path('reset/confirm/<str:code>', views.reset_confirm, name='confirm2reset'),
 ]

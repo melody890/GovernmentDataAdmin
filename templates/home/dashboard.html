@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="row row-cards">
+            <div class="col-md-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h3 class="mb-1">423</h3>
+                        <div class="text-muted">今日登记事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="post-chart" style="height: 90%"></div>
+                        <script>
+                            let post_chart = echarts.init(
+                                document.getElementById('post-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            post_chart.setOption({{ post_line | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h3 class="mb-1">423</h3>
+                        <div class="text-muted">今日处置事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="dispose-chart" style="height: 100%"></div>
+                        <script>
+                            let dispose_chart = echarts.init(
+                                document.getElementById('dispose-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            dispose_chart.setOption({{ dispose_line | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <!-- 图表 -->
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">今日事件性质</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="pie-chart" style="height: 12rem;"></div>
+                                <script>
+                                    let pie_chart = echarts.init(
+                                        document.getElementById('pie-chart'), 'white', {renderer: 'canvas'}
+                                        );
+                                    pie_chart.setOption({{ pie_chart | safe}});
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Chart title</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-pie" style="height: 12rem;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {#最近事件统计图#}
+            <div class="col-md-6 col-xl-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Line</h3>
+                    </div>
+                    <div  class="white-box">
+                        <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
+                            <select datatype="text" class="form-control pull-right row b-none" name="street" id="id_street" onchange="updateLine()">
+                                <option value='all'>--</option>
+                                {% for street in streets %}
+                                    <option value={{ street }}>{{ street }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="line" class="chart-container" style="height: 405px;"></div>
+                        <script>
+                            let line_list = {{ line_charts | safe}};
+                                function updateLine() {
+                                    let street_name = document.getElementById("id_street").value;
+                                    let line_chart = echarts.init(
+                                        document.getElementById('line'), 'white', {renderer: 'svg'}
+                                    );
+                                    line_chart.setOption(JSON.parse(line_list[street_name]));
+                                }
+                                let line_chart = echarts.init(
+                                    document.getElementById('line'), 'white', {renderer: 'svg'}
+                                );
+                                line_chart.setOption(JSON.parse(line_list['all']));
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <!-- 实时事件列表 -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">实时事件列表</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table card-table table-vcenter text-nowrap datatable">
+                            <thead>
+                            <tr>
+                                <th>统计时间</th>
+                                <th>所属街道和社区</th>
+                                <th>问题性质</th>
+                                <th>问题类型</th>
+                                <th>问题来源</th>
+                                <th>处置状态</th>
+                            </tr>
+                            </thead>
+                            <tbody id="tbody">
+                            </tbody>
+                        </table>
+                        <script>
+                            require(['datatables', 'jquery'], function(datatable, $) {
+                                $('.datatable').DataTable();
+                            });
+                        </script>
+                        <script>$.ajaxSetup({headers: {"X-CSRFToken": '{{ csrf_token }}'}});</script>
+                        <script type="text/javascript">
+                            let rows = ajaxRequest_st();
+                            window.count = 10;
+                            function ajaxRequest_st () {
+                                $.ajax({
+                                    url: 'http://' + self.location.host + '/event/query/',
+                                    type: 'GET',
+                                    success: function (result) {
+                                        window.rows = result.rows;
+                                        let infos = document.getElementById("tbody");
+                                        for (var i = 0; i < 10; i++) {
+
+                                            let tr = document.createElement("tr");
+                                            let td1 = document.createElement("td");
+                                            let td2 = document.createElement("td");
+                                            let td3 = document.createElement("td");
+                                            let td4 = document.createElement("td");
+                                            let td5 = document.createElement("td");
+                                            let td6 = document.createElement("td");
+
+
+                                            td1.innerHTML = window.rows[i].create_time;
+                                            td2.innerHTML = window.rows[i].street_community;
+                                            td3.innerHTML = window.rows[i].property;
+                                            td4.innerHTML = window.rows[i].type;
+                                            td5.innerHTML = window.rows[i].src;
+                                            td6.innerHTML = window.rows[i].status;
+
+                                            tr.appendChild(td1);
+                                            tr.appendChild(td2);
+                                            tr.appendChild(td3);
+                                            tr.appendChild(td4);
+                                            tr.appendChild(td5);
+                                            tr.appendChild(td6);
+                                            infos.appendChild(tr);
+                                        }
+                                        $("#tbody").append(infos);
+
+                                        $(document).ready(function () {
+                                            setInterval(function () {
+                                                let infos = document.getElementById("tbody");
+                                                // alert(9);
+                                                $('#tbody tr:eq(0)').remove();
+                                                let i = window.count;
+                                                window.count = (i+1)%30;
+                                                let tr = document.createElement("tr");
+                                                let td1 = document.createElement("td");
+                                                let td2 = document.createElement("td");
+                                                let td3 = document.createElement("td");
+                                                let td4 = document.createElement("td");
+                                                let td5 = document.createElement("td");
+                                                let td6 = document.createElement("td");
+
+                                                td1.innerHTML = window.rows[i].create_time;
+                                                td2.innerHTML = window.rows[i].street_community;
+                                                td3.innerHTML = window.rows[i].property;
+                                                td4.innerHTML = window.rows[i].type;
+                                                td5.innerHTML = window.rows[i].src;
+                                                td6.innerHTML = window.rows[i].status;
+
+                                                tr.appendChild(td1);
+                                                tr.appendChild(td2);
+                                                tr.appendChild(td3);
+                                                tr.appendChild(td4);
+                                                tr.appendChild(td5);
+                                                tr.appendChild(td6);
+
+                                                infos.appendChild(tr);
+
+                                                $("#tbody").append(infos);
+
+                                            },1500);
+                                        });
+
+                                        // return rows;
+                                    },
+                                });
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

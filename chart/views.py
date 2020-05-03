@@ -20,5 +20,6 @@ class IndexView(APIView):
             'map_chart': charts.map,
             'calendar_chart': charts.calendar,
             'wordcloud_chart': charts.wordcloud,
+            'cur_page': "charts",
         }
         return render(request, 'chart/charts.html', context)

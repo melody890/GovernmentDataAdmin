@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -84,6 +84,7 @@ def event_post(request):
             'types': types,
             'sources': sources,
             'units': units,
+            'cur_page': "post",
         }
         return render(request, 'event/post.html', context)
 
@@ -156,11 +157,42 @@ def event_list(request):
         "src": sources,
         "keywords":  filter_keywords,
         "url": re_url,
+        'cur_page': "list",
     }
     return render(request, 'event/list.html', context)
 
+# 全局变量，用于计数
+glo_a = 15
 
-@login_required(login_url='/user/login/')
-def event_dispose(request):
-    context = {}
-    return render(request, 'event/list.html', context)
+
+def query(request):
+    global glo_a
+    events = list(Event.objects.order_by("create_time")[glo_a:glo_a+30])
+    data = []
+    # 取模的数是循环显示的所有事件的总数
+    glo_a = (glo_a+1) % 30
+
+    for event in events:
+        st = event.achieve.status
+        if event.achieve.status == 'intime_to':
+            status = "处理中"
+        elif event.achieve.status == 'intime':
+            status = '按期办结'
+        else:
+            status = '逾期办结'
+
+        dict_row = { 'create_time': event.create_time,
+                    'street_community': str(event.community.street) + " " + str(event.community),
+                    'property': str(event.property),
+                    'type': str(event.sub_type.main_type.type),
+                    'src': str(event.event_src),
+                    'status': status}
+        data.append(dict_row)
+
+    context = {
+        "rows": data,
+    }
+    # print(context)
+
+    return JsonResponse(context)
+
