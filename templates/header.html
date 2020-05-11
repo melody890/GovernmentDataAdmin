@@ -14,14 +14,20 @@
                         {% endif %}
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                    {% for notice in user.notifications.unread %}
-                        <a href="{% url 'user:edit' user.id %}" class="dropdown-item d-flex">
+                    {% if user.notifications.unread %}
+                        {% for notice in user.notifications.unread %}
+                            <a href="{% url 'user:edit' user.id %}" class="dropdown-item d-flex">
+                              <div>
+                                <strong>{{ notice.actor }}</strong> {{ notice.verb }}
+                                <div class="small text-muted">{{ notice.timestamp|date:"Y/m/d H:i" }}</div>
+                              </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
                           <div>
-                            <strong>{{ notice.actor }}</strong> {{ notice.verb }}
-                            <div class="small text-muted">{{ notice.timestamp|date:"Y/m/d H:i" }}</div>
+                            <strong>暂时没有通知</strong>
                           </div>
-                        </a>
-                    {% endfor %}
+                    {% endif %}
                   </div>
                 </div>
                 <div class="dropdown">

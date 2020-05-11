@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'notifications',
     'notice',
     'webinfo',
+    'captcha',
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,7 @@ SOCIAL_AUTH_GITHUB_SECRET = 'e33493009cde736d152f567886f87373c2a65921'
 SOCIAL_AUTH_GITHUB_USE_OPENID_AS_USERNAME = True
 
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/chart'
+
+# 自定义验证码模板
+CAPTCHA_TEXT_FIELD_TEMPLATE = BASE_DIR + '/templates/user/captcha.html'
+CAPTCHA_OUTPUT_FORMAT = '%(text_field)s %(hidden_field)s %(image)s'

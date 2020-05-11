@@ -1,14 +1,19 @@
 import datetime
 import pytz
 from uuid import uuid4
+from PIL import Image, ImageDraw, ImageFont
+import random
+from io import BytesIO
 
 from notifications.signals import notify
+from captcha.models import CaptchaStore
+from captcha.helpers import captcha_image_url
 
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
@@ -20,6 +25,7 @@ from home.views import error_page
 
 def user_login(request):
     user = request.user
+
     if user.is_authenticated:
         return redirect(to="home:dashboard")
     else:
@@ -48,6 +54,11 @@ def user_logout(request):
     logout(request)
     return redirect(to="user:login")
 
+def congratulate_page(request, info):
+    context = {
+        "info": info,
+    }
+    return render(request, "user/congratulate.html", context)
 
 def user_register(request):
     user = request.user
@@ -64,7 +75,7 @@ def user_register(request):
                 email = request.POST.get('email')
                 code = make_confirm_string(new_user)
                 confirm_email('confirm2register',email, code,request.get_host(), new_user.username)
-                return HttpResponse("验证邮件已发出，请前往邮箱验证")
+                return congratulate_page(request=request, info="验证邮件已发出，请前往邮箱验证")
             else:
                 return error_page(request=request, info="注册表单有误。请重新输入。")
         elif request.method == 'GET':
@@ -198,7 +209,7 @@ def register_confirm(request, code):
         confirm.user.save()
         confirm.delete()
         message = '恭喜您注册成功，赶快尝试登录吧！'
-    return HttpResponse(message)
+    return congratulate_page(request, message)
 
 
 def reset_password(request):
@@ -215,7 +226,7 @@ def reset_password(request):
                 return error_page(request, "账号或邮箱输入错误")
             code = make_confirm_string(user)
             confirm_email('confirm2reset', email, code, request.get_host(), username)
-            return HttpResponse("验证邮件已发送，请往邮箱进行验证")
+            return congratulate_page(request, "验证邮件已发送，请往邮箱进行验证")
         else:
             return error_page(request, "账号或邮箱输入不合法")
     elif request.method == 'GET':
@@ -242,7 +253,7 @@ def reset_confirm(request, code):
         confirm.user.set_password(newpassword)
         confirm.user.save()
         confirm.delete()
-        return HttpResponse('恭喜您重置成功，赶快尝试登录吧！')    
+        return congratulate_page(request, '恭喜您重置成功，赶快尝试登录吧！')
     elif request.method == 'GET':
         reset_pw_form = ResetPwForm()
         context = {'form': reset_pw_form}
