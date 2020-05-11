@@ -80,5 +80,34 @@
             </div>
         </div>
     </div>
+    {#  验证码动态刷新  #}
+    <script src="\static\assets\js\vendors\jquery-3.2.1.min.js"></script>
+    <script>
+        $(function(){
+        $('.captcha').css({
+            'cursor': 'pointer'
+        })
+        $('.captcha').click(function(){
+            console.log('click');
+             $.getJSON("/captcha/refresh/",
+                      function(result){
+                 $('.captcha').attr('src', result['image_url']);
+                 $('#id_captcha_0').val(result['key'])
+              });});
+        $('#id_captcha_1').blur(function(){
+            json_data={
+                'response':$('#id_captcha_1').val(),
+                'hashkey':$('#id_captcha_0').val()
+            }
+            $.getJSON('/user/ajaxval', json_data, function(data){
+                if(data['status']){
+                    $('#id_captcha_1').after()
+                }else{
+                     $('#id_captcha_1').after()
+                }
+            });
+        });
+        })
+    </script>
 </body>
 </html>

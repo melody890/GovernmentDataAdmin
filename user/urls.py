@@ -12,4 +12,5 @@ urlpatterns = [
     path('register/confirm/<str:code>', views.register_confirm, name='confirm2register'),
     path('reset/', views.reset_password, name='reset'),
     path('reset/confirm/<str:code>', views.reset_confirm, name='confirm2reset'),
+    path('ajaxval/', views.ajax_val, name='ajaxval'),
 ]

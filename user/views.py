@@ -40,7 +40,7 @@ def user_login(request):
                 else:
                     return error_page(request=request, info="账号或密码输入有误。请重新输入。")
             else:
-                return error_page(request=request, info="账号或密码输入不合法")
+                return error_page(request=request, info="账号或密码或验证码输入不合法")
         elif request.method == 'GET':
             user_login_form = UserLoginForm()
             context = {'form': user_login_form}
@@ -260,3 +260,15 @@ def reset_confirm(request, code):
         return render(request, 'user/resetconfirm.html', context)
     else:
         return error_page(request, "请使用GET或POST请求数据。")
+
+def ajax_val(request):
+    if  request.is_ajax():
+        cs = CaptchaStore.objects.filter(response=request.GET['response'], hashkey=request.GET['hashkey'])
+        if cs:
+            json_data={'status':1}
+        else:
+            json_data = {'status':0}
+        return JsonResponse(json_data)
+    else:
+        json_data = {'status':0}
+        return JsonResponse(json_data)
