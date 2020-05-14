@@ -1,81 +1,15 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
+<div class="center"><h1>政府近期工作数据一览</h1></div>
 <div class="my-3 my-md-5">
     <div class="container">
         <div class="row row-cards">
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-value float-right text-yellow">9%</div>
-                        <h3 class="mb-1">423</h3>
-                        <div class="text-muted">今日登记事件</div>
-                    </div>
-                    <div class="card-chart-bg">
-                        <div id="post-chart" style="height: 90%"></div>
-                        <script>
-                            let post_chart = echarts.init(
-                                document.getElementById('post-chart'), 'white', {renderer: 'canvas'}
-                            );
-                            post_chart.setOption({{ post_line | safe}});
-                        </script>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-value float-right text-yellow">9%</div>
-                        <h3 class="mb-1">423</h3>
-                        <div class="text-muted">今日处置事件</div>
-                    </div>
-                    <div class="card-chart-bg">
-                        <div id="dispose-chart" style="height: 100%"></div>
-                        <script>
-                            let dispose_chart = echarts.init(
-                                document.getElementById('dispose-chart'), 'white', {renderer: 'canvas'}
-                            );
-                            dispose_chart.setOption({{ dispose_line | safe}});
-                        </script>
-                    </div>
-                </div>
-            </div>
-            <!-- 图表 -->
-            <div class="col-md-6">
-                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">今日事件性质</h3>
-                            </div>
-                            <div class="card-body">
-                                <div id="pie-chart" style="height: 12rem;"></div>
-                                <script>
-                                    let pie_chart = echarts.init(
-                                        document.getElementById('pie-chart'), 'white', {renderer: 'canvas'}
-                                        );
-                                    pie_chart.setOption({{ pie_chart | safe}});
-                                </script>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">Chart title</h3>
-                            </div>
-                            <div class="card-body">
-                                <div id="chart-pie" style="height: 12rem;"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
             {#最近事件统计图#}
             <div class="col-md-6 col-xl-12">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">Line</h3>
+                        <h3 class="card-title">Line    最近事件统计图</h3>
                     </div>
                     <div  class="white-box">
                         <div class="col-md-3 col-sm-4 col-xs-6 pull-right">
@@ -103,6 +37,74 @@
                                 );
                                 line_chart.setOption(JSON.parse(line_list['all']));
                         </script>
+                    </div>
+                </div>
+            </div>
+            <div class="blank"></div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card1">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h6 class="mb-1">423</h6>
+                        <div class="text-muted">今日登记事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="post-chart" style="height: 90%"></div>
+                        <script>
+                            let post_chart = echarts.init(
+                                document.getElementById('post-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            post_chart.setOption({{ post_line | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card1">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h6 class="mb-1">423</h6>
+                        <div class="text-muted">今日处置事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="dispose-chart" style="height: 100%"></div>
+                        <script>
+                            let dispose_chart = echarts.init(
+                                document.getElementById('dispose-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            dispose_chart.setOption({{ dispose_line | safe}});
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <!-- 图表 -->
+            <div class="col-md-6">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="card1">
+                            <div class="card-header">
+                                <h3 class="card-title">今日事件性质</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="pie-chart" style="height: 12rem;"></div>
+                                <script>
+                                    let pie_chart = echarts.init(
+                                        document.getElementById('pie-chart'), 'white', {renderer: 'canvas'}
+                                        );
+                                    pie_chart.setOption({{ pie_chart | safe}});
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="card1">
+                            <div class="card-header">
+                                <h3 class="card-title">Chart title</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="chart-pie" style="height: 12rem;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
