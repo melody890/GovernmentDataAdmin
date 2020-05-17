@@ -2,6 +2,8 @@ import datetime
 import pytz
 from uuid import uuid4
 
+from notifications.signals import notify
+
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -88,6 +90,8 @@ def user_delete(request, id):
 def profile_edit(request, id):
     user = User.objects.get(id=id)
 
+    notices = user.notifications.unread()
+
     if Profile.objects.filter(user_id=id).exists():
         profile = Profile.objects.get(user_id=id)
     else:
@@ -122,6 +126,7 @@ def profile_edit(request, id):
             'profile_form': profile_form,
             'profile': profile,
             'user': user,
+            'notices': notices,
         }
         return render(request, 'user/edit.html', context)
     else:
@@ -184,6 +189,11 @@ def register_confirm(request, code):
         confirm.user.delete()
         message = '您的邮件已经过期！请重新注册!'
     else:
+        notify.send(
+            confirm.user,
+            recipient=User.objects.filter(is_superuser=1),
+            verb='注册了新账号',
+        )
         confirm.user.is_active = True
         confirm.user.save()
         confirm.delete()
@@ -223,6 +233,11 @@ def reset_confirm(request, code):
         return error_page(request, '无效的确认请求!')
 
     if request.method == 'POST':
+        notify.send(
+            confirm.user,
+            recipient=User.objects.filter(is_superuser=1),
+            verb='重置了账号',
+        )
         newpassword = request.POST.get('newpassword')
         confirm.user.set_password(newpassword)
         confirm.user.save()
