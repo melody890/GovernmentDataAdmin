@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="Copy of project-level server 'newest_to_push'">
+  <component name="PublishConfigData" autoUpload="Always" serverName="newest_to_push">
     <serverData>
       <paths name="0407">
         <serverdata>
@@ -13,13 +13,6 @@
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="Copy of project-level server 'newest_to_push'">
-        <serverdata>
-          <mappings>
-            <mapping deploy="/tmp/pycharm_project_581" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
@@ -45,6 +38,13 @@
         </serverdata>
       </paths>
       <paths name="newest_to_push">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/pycharm_project_81" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="newest_to_push (project level)">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
