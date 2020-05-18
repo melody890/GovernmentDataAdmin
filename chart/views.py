@@ -21,5 +21,6 @@ class IndexView(APIView):
             'calendar_chart': charts.calendar,
             'wordcloud_chart': charts.wordcloud,
             'cur_page': "charts",
+            'bar_chart': charts.bar,
         }
         return render(request, 'chart/charts.html', context)
