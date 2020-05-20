@@ -14,14 +14,20 @@
                         {% endif %}
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                    {% for notice in user.notifications.unread %}
-                        <a href="{% url 'user:edit' user.id %}" class="dropdown-item d-flex">
+                    {% if user.notifications.unread %}
+                        {% for notice in user.notifications.unread %}
+                            <a href="{% url 'user:edit' user.id %}" class="dropdown-item d-flex">
+                              <div>
+                                <strong>{{ notice.actor }}</strong> {{ notice.verb }}
+                                <div class="small text-muted">{{ notice.timestamp|date:"Y/m/d H:i" }}</div>
+                              </div>
+                            </a>
+                        {% endfor %}
+                    {% else %}
                           <div>
-                            <strong>{{ notice.actor }}</strong> {{ notice.verb }}
-                            <div class="small text-muted">{{ notice.timestamp|date:"Y/m/d H:i" }}</div>
+                            <strong>暂时没有通知</strong>
                           </div>
-                        </a>
-                    {% endfor %}
+                    {% endif %}
                   </div>
                 </div>
                 <div class="dropdown">
@@ -40,9 +46,15 @@
                         <a class="dropdown-item" href="{% url 'user:edit' user.id %}">
                             <i class="dropdown-icon fe fe-user"></i> Profile
                         </a>
-                        <a class="dropdown-item" href="#">
-                            <i class="dropdown-icon fe fe-settings"></i> Settings
-                        </a>
+                        {% if user.is_superuser %}
+                            <a class="dropdown-item" href="{% url 'user:permissionView'%}">
+                                <i class="dropdown-icon fe fe-settings"></i> Permission
+                            </a>
+                        {% else %}
+                            <a class="dropdown-item" href="{% url 'user:permissionApply'%}">
+                                <i class="dropdown-icon fe fe-settings"></i> Permission
+                            </a>
+                        {% endif %}
                         <a class="dropdown-item" href="#">
                             <span class="float-right"><span class="badge badge-primary">6</span></span>
                             <i class="dropdown-icon fe fe-mail"></i> Inbox
