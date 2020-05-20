@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">
+                申请详情
+            </h1>
+        </div>
+        <div class="col-12">
+            <form enctype="multipart/form-data" method="post" class="card">
+            {% csrf_token %}
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 col-lg-6">
+                            <div class="form-group">
+                                <label for="id_event_src" class="col-md-12">申请用户:</label>
+                                <div class="col-sm-12">
+                                    <b>{{ apply.user }}</b>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_event_src" class="col-md-12">申请权限:</label>
+                                <div class="col-sm-12">
+                                    <b>{{ apply.apply_permission }}</b>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_apply_unit" class="col-md-12">申请部门:</label>
+                                <div class="col-md-12">
+                                    <b>{{ apply.apply_unit }}</b>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="id_validation" class="col-md-12">验证信息:</label>
+                                <div class="col-md-12">
+                                    <b>{{ apply.validation }}</b>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer text-right">
+                    <button type="submit" class="btn btn-primary ml-auto" name="reject">拒绝</button>
+                    <button type="submit" class="btn btn-primary ml-auto" name="accept">接受</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+

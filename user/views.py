@@ -17,8 +17,9 @@ from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
-from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm
-from .models import Profile, ConfirmString
+from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm, PermissionApplyForm
+from .models import Profile, ConfirmString, ApplyList
+from event.models import EventSource, DisposeUnit
 
 from home.views import error_page
 
@@ -103,6 +104,8 @@ def profile_edit(request, id):
 
     notices = user.notifications.unread()
 
+    apply_list = ApplyList.objects.all()
+
     if Profile.objects.filter(user_id=id).exists():
         profile = Profile.objects.get(user_id=id)
     else:
@@ -138,6 +141,7 @@ def profile_edit(request, id):
             'profile': profile,
             'user': user,
             'notices': notices,
+            'apply_list':apply_list,
         }
         return render(request, 'user/edit.html', context)
     else:
@@ -272,3 +276,116 @@ def ajax_val(request):
     else:
         json_data = {'status':0}
         return JsonResponse(json_data)
+
+def apply_permission(request):
+    if request.method == 'POST':
+        if ApplyList.objects.filter(user=request.user).exists():
+            return error_page(request,'你已经提交申请，无需重复操作')
+        if not Profile.objects.filter(user=request.user).exists():
+            profile = Profile.objects.create(user=request.user)
+        else:
+            profile = Profile.objects.get(user=request.user)
+        apply_form = PermissionApplyForm(request.POST)
+        if apply_form.is_valid():
+            form_data = apply_form.cleaned_data
+            if profile.is_disposer:
+                return error_page(request, "你已经拥有处理员权限")
+            if profile.is_poster:
+                return error_page(request, "你已经拥有上传员权限")
+            if request.user.is_superuser:
+                return error_page(request, "你已经拥有"+form_data.get('apply_permission')+"权限")
+            es = EventSource.objects.all()
+            es_name = []
+            for unit in es:
+                es_name.append(unit.name)
+            if form_data.get('apply_unit') in es_name and form_data.get('apply_permission')=='处理员':
+                return error_page(request, "处理机构只能申请处理员")
+            if form_data.get('apply_unit') not in es_name and form_data.get('apply_permission')=='上传员':
+                return error_page(request, "来源机构只能申请上传员")
+            notify.send(
+                request.user,
+                recipient=User.objects.filter(is_superuser=1),
+                verb='代表'+form_data.get('apply_unit') + '申请' + form_data.get('apply_permission') + '权限',
+            )
+            ApplyList.objects.create(user=request.user, apply_permission=form_data.get('apply_permission'), apply_unit=form_data.get('apply_unit'), validation=form_data.get('validation'))
+            return redirect("user:permissionApply")
+        else:
+            return HttpResponse("表单内容有误，请重新填写。")
+    else:
+        apply_form = PermissionApplyForm()
+        sources = EventSource.objects.all()
+        units = DisposeUnit.objects.all()
+        apply_permissions = ['处理员','上传员']
+        context = {
+            'form': PermissionApplyForm,
+            'sources': sources,
+            'units': units,
+            'apply_permissions':apply_permissions,
+        }
+        return render(request, 'user/permissionapply.html', context)
+
+def verify_permission(request,id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    apply = ApplyList.objects.get(id=id)
+    if request.method == 'POST':
+        if 'reject' in request.POST:
+            notify.send(
+                request.user,
+                recipient=User.objects.filter(is_superuser=1),
+                verb='拒绝了' + apply.user.username + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
+            )
+            notify.send(
+                request.user,
+                recipient=apply.user,
+                verb='拒绝了' + '你' + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
+            )
+            apply.delete()
+            return redirect(to='user:edit', id=request.user.id)
+        else:
+            notify.send(
+                request.user,
+                recipient=User.objects.filter(is_superuser=1),
+                verb='接受了' + apply.user.username + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
+            )
+            notify.send(
+                request.user,
+                recipient=apply.user,
+                verb='接受了' + '你' + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
+            )
+            profile = Profile.objects.get(user=apply.user)
+            if apply.apply_permission == '上传员':
+                profile.is_poster = True
+            else:
+                profile.is_disposer = True
+            profile.unit = apply.apply_unit
+            profile.save()
+            apply.delete()
+            return redirect(to='user:edit', id=request.user.id)
+    else:
+        context = { 'apply':apply,
+                    }
+    return render(request, 'user/permissionverify.html', context)
+
+def view_permission(request):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    dispose_profiles = Profile.objects.filter(is_disposer=True)
+    post_profiles = Profile.objects.filter(is_poster=True)
+    superusers = User.objects.filter(is_superuser=True)
+    context = { 'dispose_profiles':dispose_profiles,
+                'post_profiles':post_profiles,
+                'superusers':superusers,
+               }
+    return render(request, 'user/permissionview.html', context)
+
+def permission_delete(request,id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    user = User.objects.get(id=id)
+    profile = Profile.objects.get(user=user)
+    profile.is_poster = False
+    profile.is_disposer = False
+    profile.unit = ''
+    profile.save()
+    return redirect(to='user:permissionView')

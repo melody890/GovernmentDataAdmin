@@ -6,8 +6,10 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.apps import apps
 
+from home.views import error_page
 from .forms import EventForm
 from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType, MainType
+from user.models import Profile
 
 filter_value = ["status", "type", "property", "street", "source", "maintype", "community"]
 
@@ -55,10 +57,17 @@ def update_number():
 
 @login_required(login_url='/user/login/')
 def event_post(request):
+    flag = False
+    if Profile.objects.filter(user=request.user).exists():
+        flag =Profile.objects.get(user=request.user).is_poster
+    if not flag:
+        return error_page(request,'您没有权限进行此操作')
     if request.method == 'POST':
         event_post_form = EventForm(request.POST)
         if event_post_form.is_valid():
             form_data = event_post_form.cleaned_data
+            if form_data.get('event_src')!=Profile.objects.get(user=request.user).unit:
+                return error_page(request, '您没有权限进行此操作')
             new_event = Event()
             new_event.author = User.objects.get(id=request.user.id)
             new_event.property = Property.objects.get(name=form_data['property'])
@@ -120,6 +129,12 @@ def my_filter(keyword, events_list):
 
 @login_required(login_url='/user/login/')
 def event_list(request):
+    if Profile.objects.filter(user=request.user).exists():
+        profile = Profile.objects.get(user=request.user)
+    else:
+        profile = Profile.objects.create(user=request.user)
+    flag = profile.is_disposer
+    unit = profile.unit
     get_key = request.GET.get
     events = Event.objects.all()
     filter_keywords = []
@@ -158,6 +173,8 @@ def event_list(request):
         "keywords":  filter_keywords,
         "url": re_url,
         'cur_page': "list",
+        'flag':flag,
+        'unit':unit,
     }
     return render(request, 'event/list.html', context)
 

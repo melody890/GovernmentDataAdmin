@@ -40,3 +40,8 @@ class ResetForm(forms.Form):
 
 class ResetPwForm(forms.Form):
     password = forms.CharField()
+
+class PermissionApplyForm(forms.Form):
+    apply_permission = forms.CharField()
+    apply_unit = forms.CharField()
+    validation = forms.CharField()

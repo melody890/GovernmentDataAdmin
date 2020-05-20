@@ -15,6 +15,17 @@
                         {% endif %}
                         <h3 class="mb-3">{{ profile.user.username }}</h3>
                         <h4 class="mb-3">{{ profile.user.email }}</h4>
+                        {% if user.is_superuser %}
+                        <h4 class="mb-3">超管</h4>
+                        {% elif profile.is_disposer %}
+                        <h4 class="mb-3">处理员</h4>
+                        <h5 class="mb-3">{{ profile.unit }}</h5>
+                        {% elif profile.is_poster %}
+                        <h4 class="mb-3">上传员</h4>
+                        <h5 class="mb-3">{{ profile.unit }}</h5>
+                        {% else %}
+                        <h4 class="mb-3">游客</h4>
+                        {% endif %}
                         <p class="mb-4">{{ profile.bio }}</p>
                     </div>
                 </div>
@@ -104,10 +115,33 @@
                                 <a href="{% url "notice:update" %}" class="btn btn-warning" role="button">清空所有通知</a>
                             </div>
                         </div>
+                </div>
+            </div>
+            {% if user.is_superuser %}
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">申请列表</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="container">
+                            <!-- 待审申请列表 -->
+                            <div class="row mt-2 ml-4">
+                                <ul class="list-group">
+                                    {% for apply in apply_list %}
+                                        <li class="list-group-item" id="notice_link">
+                                        <a href="{% url "user:permissionVerify" apply.id %}">
+                                            {{ apply }}
+                                        </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+            {% endif %}
     </div>
 </div>
 
