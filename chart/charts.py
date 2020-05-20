@@ -3,7 +3,8 @@ import random
 import json
 from datetime import timedelta, date
 
-from pyecharts.charts import Sunburst, BMap, Line, WordCloud, Pie, Calendar
+from django.db.models import Q, Count
+from pyecharts.charts import Sunburst, BMap, Line, WordCloud, Pie, Calendar, Bar, Grid
 from pyecharts.faker import Faker
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType, GeoType, ThemeType
@@ -42,6 +43,7 @@ class Charts:
         self.wordcloud = self.wordcloud_base()
         self.sunburst = self.sunburst_base()
         self.calendar = self.calendar_base()
+        self.bar = self.bar_base()
         self.map = self.map_base()
         # self.all()
 
@@ -302,3 +304,57 @@ class Charts:
         end = datetime.datetime.now()
         print("Map: " + str(end - start))
         return c.dump_options_with_quotes()
+
+    def bar_base(self) -> Bar:
+        start = datetime.datetime.now()
+
+        dispose_unit = []
+        done = []
+        undo = []
+        count_dispose_unit = 30
+
+        event_counts = Event.objects.filter(Q(achieve=1)).values('dispose_unit').annotate(count=Count('dispose_unit')).values('dispose_unit', 'count').order_by('-count')
+        event_counts = list(event_counts)
+        sum_of_done = 0
+        sum_of_undo = 0
+        # print(len(event_counts))
+        # print(event_counts)
+        for i in range(0,count_dispose_unit):
+            undo_event = Event.objects.filter(Q(achieve=3) & Q(dispose_unit = event_counts[i]['dispose_unit']))
+            undo_event_num = len(undo_event)
+            dispose_unit_name = DisposeUnit.objects.filter(id=event_counts[i]['dispose_unit']).values("name")[0]['name']
+            dispose_unit.append(dispose_unit_name)
+            done.append(event_counts[i]['count'])
+            undo.append(undo_event_num)
+        for i in range(count_dispose_unit,len(event_counts)):
+            undo_event = Event.objects.filter(Q(achieve=3) & Q(dispose_unit=event_counts[i]['dispose_unit']))
+            undo_event_num = len(undo_event)
+            sum_of_done = sum_of_done + event_counts[i]['count']
+            sum_of_undo = sum_of_undo + undo_event_num
+        other_unit_num = len(event_counts) - count_dispose_unit
+        dispose_unit.append("其他"+str(other_unit_num)+"个部门总和")
+        done.append(sum_of_done)
+        undo.append(sum_of_undo)
+        c = (
+            Bar()
+                .add_xaxis(dispose_unit)
+                .add_yaxis("按期完成", done, stack="stack1",category_gap="60%")
+                .add_yaxis("逾期完成", undo, stack="stack1",category_gap="60%")
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=False))
+                .set_global_opts(
+                xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                title_opts=opts.TitleOpts(title="处理事件最多的部门"),
+                datazoom_opts=[opts.DataZoomOpts(), opts.DataZoomOpts(type_="inside")],
+
+                )
+        )
+
+        grid = Grid()
+
+        grid.add(c, grid_opts=opts.GridOpts(pos_bottom="20%"))
+
+        c = grid.dump_options_with_quotes()
+
+        end = datetime.datetime.now()
+        print("Bar: " + str(end - start))
+        return c
