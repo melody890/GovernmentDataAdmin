@@ -324,58 +324,17 @@ def apply_permission(request):
         }
         return render(request, 'user/permissionapply.html', context)
 
-def verify_permission(request,id):
-    if not request.user.is_superuser:
-        return error_page(request,'您没有权限进行此操作')
-    apply = ApplyList.objects.get(id=id)
-    if request.method == 'POST':
-        if 'reject' in request.POST:
-            notify.send(
-                request.user,
-                recipient=User.objects.filter(is_superuser=1),
-                verb='拒绝了' + apply.user.username + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
-            )
-            notify.send(
-                request.user,
-                recipient=apply.user,
-                verb='拒绝了' + '你' + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
-            )
-            apply.delete()
-            return redirect(to='user:edit', id=request.user.id)
-        else:
-            notify.send(
-                request.user,
-                recipient=User.objects.filter(is_superuser=1),
-                verb='接受了' + apply.user.username + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
-            )
-            notify.send(
-                request.user,
-                recipient=apply.user,
-                verb='接受了' + '你' + '关于' + apply.apply_unit + '的' + apply.apply_permission + '权限的申请',
-            )
-            profile = Profile.objects.get(user=apply.user)
-            if apply.apply_permission == '上传员':
-                profile.is_poster = True
-            else:
-                profile.is_disposer = True
-            profile.unit = apply.apply_unit
-            profile.save()
-            apply.delete()
-            return redirect(to='user:edit', id=request.user.id)
-    else:
-        context = { 'apply':apply,
-                    }
-    return render(request, 'user/permissionverify.html', context)
-
 def view_permission(request):
     if not request.user.is_superuser:
         return error_page(request,'您没有权限进行此操作')
     dispose_profiles = Profile.objects.filter(is_disposer=True)
     post_profiles = Profile.objects.filter(is_poster=True)
     superusers = User.objects.filter(is_superuser=True)
+    applications = ApplyList.objects.all()
     context = { 'dispose_profiles':dispose_profiles,
                 'post_profiles':post_profiles,
                 'superusers':superusers,
+                'applications':applications,
                }
     return render(request, 'user/permissionview.html', context)
 
@@ -384,8 +343,61 @@ def permission_delete(request,id):
         return error_page(request,'您没有权限进行此操作')
     user = User.objects.get(id=id)
     profile = Profile.objects.get(user=user)
+    notify.send(
+        request.user,
+        recipient=User.objects.filter(is_superuser=1),
+        verb='撤除了' + profile.user.username + '关于' + profile.unit + '的权限',
+    )
+    notify.send(
+        request.user,
+        recipient=profile.user,
+        verb='撤除了' + '你' + '关于' + profile.unit + '的权限',
+    )
     profile.is_poster = False
     profile.is_disposer = False
     profile.unit = ''
     profile.save()
+    return redirect(to='user:permissionView')
+
+def reject_permission(request, id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    user = User.objects.get(id=id)
+    application = ApplyList.objects.get(user=user)
+    notify.send(
+        request.user,
+        recipient=User.objects.filter(is_superuser=1),
+        verb='拒绝了' + application.user.username + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    notify.send(
+        request.user,
+        recipient=application.user,
+        verb='拒绝了' + '你' + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    application.delete()
+    return redirect(to='user:permissionView')
+
+def accept_permission(request, id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    user = User.objects.get(id=id)
+    profile = Profile.objects.get(user=user)
+    application = ApplyList.objects.get(user=user)
+    if application.apply_permission == '处理员':
+        profile.is_disposer = True
+    else:
+        profile.is_poster = True
+    profile.unit = application.apply_unit
+    profile.save()
+    notify.send(
+        request.user,
+        recipient=User.objects.filter(is_superuser=1),
+        verb='接受了' + application.user.username + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    notify.send(
+        request.user,
+        recipient=application.user,
+        verb='接受了' + '你' + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    application.delete()
     return redirect(to='user:permissionView')

@@ -117,31 +117,6 @@
                         </div>
                 </div>
             </div>
-            {% if user.is_superuser %}
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <h3 class="card-title">申请列表</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="container">
-                            <!-- 待审申请列表 -->
-                            <div class="row mt-2 ml-4">
-                                <ul class="list-group">
-                                    {% for apply in apply_list %}
-                                        <li class="list-group-item" id="notice_link">
-                                        <a href="{% url "user:permissionVerify" apply.id %}">
-                                            {{ apply }}
-                                        </a>
-                                        </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
     </div>
 </div>
 
