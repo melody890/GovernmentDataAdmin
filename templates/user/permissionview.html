@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="my-3 my-md-5">
+    <div class="container">
+        <div class="row row-cards">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="sorting" tabindex="0" rowspan="1" colspan="1">用户id</th>
+                        <th>用户名</th>
+                        <th>权限</th>
+                        <th>所属机构</th>
+                        <th>备注</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                        <tr class="application" id="{{ application.user.id }}">
+                            <td>{{ application.user.id }}</td>
+                            <td>{{ application.user.username }}</td>
+                            <td>{{ application.apply_permission }}</td>
+                            <td>{{ application.apply_unit }}</td>
+                            <td>{{ application.validation }}</td>
+                            <td>
+                                <a href="{% url 'user:permissionAccept' application.user_id %}" class="btn btn-primary ml-auto">接受</a>
+                                <a href="{% url 'user:permissionReject' application.user_id %}" class="btn btn-primary ml-auto">拒绝</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% for superuser in superusers %}
+                        <tr class="superuser" id="{{ superuser.id }}">
+                            <td>{{ superuser.id }}</td>
+                            <td>{{ superuser.username }}</td>
+                            <td>超级管理员</td>
+                            <td>无</td>
+                            <td>无</td>
+                        </tr>
+                    {% endfor %}
+                    {% for dispose_profile in dispose_profiles %}
+                        <tr class="disposer" id="{{ dispose_profile.user.id }}">
+                            <td>{{ dispose_profile.user.id }}</td>
+                            <td>{{ dispose_profile.user.username }}</td>
+                            <td>处理员</td>
+                            <td>{{ dispose_profile.unit }}</td>
+                            <td>无</td>
+                            <td><a href="{% url 'user:permissionDelete' dispose_profile.user_id %}" class="btn btn-primary ml-auto">撤除</a></td>
+                        </tr>
+                    {% endfor %}
+                    {% for post_profile in post_profiles %}
+                        <tr class="disposer" id="{{ post_profile.user.id }}">
+                            <td>{{ post_profile.user.id }}</td>
+                            <td>{{ post_profile.user.username }}</td>
+                            <td>上传员</td>
+                            <td>{{ post_profile.unit }}</td>
+                            <td>无</td>
+                            <td><a href="{% url 'user:permissionDelete' post_profile.user_id %}" class="btn btn-primary ml-auto">撤除</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

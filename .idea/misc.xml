@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+<<<<<<< HEAD
+  <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.7.6 (sftp://admin@134.175.209.4:22/home/admin/Envs/dataadmin/bin/python3) (2)" project-jdk-type="Python SDK" />
+=======
   <component name="ProjectRootManager" version="2" project-jdk-name="Remote Python 3.7.6 (sftp://admin@134.175.209.4:22/home/admin/Envs/dataadmin/bin/python3) (8)" project-jdk-type="Python SDK" />
+>>>>>>> 7704f824360023fbb16737ae10178603dfc66278
   <component name="PyCharmProfessionalAdvertiser">
     <option name="shown" value="true" />
+  </component>
+  <component name="PyPackaging">
+    <option name="earlyReleasesAsUpgrades" value="true" />
   </component>
 </project>

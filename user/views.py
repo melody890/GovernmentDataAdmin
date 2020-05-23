@@ -1,25 +1,32 @@
 import datetime
 import pytz
 from uuid import uuid4
+from PIL import Image, ImageDraw, ImageFont
+import random
+from io import BytesIO
 
 from notifications.signals import notify
+from captcha.models import CaptchaStore
+from captcha.helpers import captcha_image_url
 
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
-from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm
-from .models import Profile, ConfirmString
+from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm, PermissionApplyForm
+from .models import Profile, ConfirmString, ApplyList
+from event.models import EventSource, DisposeUnit
 
 from home.views import error_page
 
 
 def user_login(request):
     user = request.user
+
     if user.is_authenticated:
         return redirect(to="home:dashboard")
     else:
@@ -34,7 +41,7 @@ def user_login(request):
                 else:
                     return error_page(request=request, info="账号或密码输入有误。请重新输入。")
             else:
-                return error_page(request=request, info="账号或密码输入不合法")
+                return error_page(request=request, info="账号或密码或验证码输入不合法")
         elif request.method == 'GET':
             user_login_form = UserLoginForm()
             context = {'form': user_login_form}
@@ -48,6 +55,11 @@ def user_logout(request):
     logout(request)
     return redirect(to="user:login")
 
+def congratulate_page(request, info):
+    context = {
+        "info": info,
+    }
+    return render(request, "user/congratulate.html", context)
 
 def user_register(request):
     user = request.user
@@ -64,7 +76,7 @@ def user_register(request):
                 email = request.POST.get('email')
                 code = make_confirm_string(new_user)
                 confirm_email('confirm2register',email, code,request.get_host(), new_user.username)
-                return HttpResponse("验证邮件已发出，请前往邮箱验证")
+                return congratulate_page(request=request, info="验证邮件已发出，请前往邮箱验证")
             else:
                 return error_page(request=request, info="注册表单有误。请重新输入。")
         elif request.method == 'GET':
@@ -91,6 +103,8 @@ def profile_edit(request, id):
     user = User.objects.get(id=id)
 
     notices = user.notifications.unread()
+
+    apply_list = ApplyList.objects.all()
 
     if Profile.objects.filter(user_id=id).exists():
         profile = Profile.objects.get(user_id=id)
@@ -127,6 +141,7 @@ def profile_edit(request, id):
             'profile': profile,
             'user': user,
             'notices': notices,
+            'apply_list':apply_list,
         }
         return render(request, 'user/edit.html', context)
     else:
@@ -198,7 +213,7 @@ def register_confirm(request, code):
         confirm.user.save()
         confirm.delete()
         message = '恭喜您注册成功，赶快尝试登录吧！'
-    return HttpResponse(message)
+    return congratulate_page(request, message)
 
 
 def reset_password(request):
@@ -215,7 +230,7 @@ def reset_password(request):
                 return error_page(request, "账号或邮箱输入错误")
             code = make_confirm_string(user)
             confirm_email('confirm2reset', email, code, request.get_host(), username)
-            return HttpResponse("验证邮件已发送，请往邮箱进行验证")
+            return congratulate_page(request, "验证邮件已发送，请往邮箱进行验证")
         else:
             return error_page(request, "账号或邮箱输入不合法")
     elif request.method == 'GET':
@@ -242,10 +257,147 @@ def reset_confirm(request, code):
         confirm.user.set_password(newpassword)
         confirm.user.save()
         confirm.delete()
-        return HttpResponse('恭喜您重置成功，赶快尝试登录吧！')    
+        return congratulate_page(request, '恭喜您重置成功，赶快尝试登录吧！')
     elif request.method == 'GET':
         reset_pw_form = ResetPwForm()
         context = {'form': reset_pw_form}
         return render(request, 'user/resetconfirm.html', context)
     else:
         return error_page(request, "请使用GET或POST请求数据。")
+
+def ajax_val(request):
+    if  request.is_ajax():
+        cs = CaptchaStore.objects.filter(response=request.GET['response'], hashkey=request.GET['hashkey'])
+        if cs:
+            json_data={'status':1}
+        else:
+            json_data = {'status':0}
+        return JsonResponse(json_data)
+    else:
+        json_data = {'status':0}
+        return JsonResponse(json_data)
+
+def apply_permission(request):
+    if request.method == 'POST':
+        if ApplyList.objects.filter(user=request.user).exists():
+            return error_page(request,'你已经提交申请，无需重复操作')
+        if not Profile.objects.filter(user=request.user).exists():
+            profile = Profile.objects.create(user=request.user)
+        else:
+            profile = Profile.objects.get(user=request.user)
+        apply_form = PermissionApplyForm(request.POST)
+        if apply_form.is_valid():
+            form_data = apply_form.cleaned_data
+            if profile.is_disposer:
+                return error_page(request, "你已经拥有处理员权限")
+            if profile.is_poster:
+                return error_page(request, "你已经拥有上传员权限")
+            if request.user.is_superuser:
+                return error_page(request, "你已经拥有"+form_data.get('apply_permission')+"权限")
+            es = EventSource.objects.all()
+            es_name = []
+            for unit in es:
+                es_name.append(unit.name)
+            if form_data.get('apply_unit') in es_name and form_data.get('apply_permission')=='处理员':
+                return error_page(request, "处理机构只能申请处理员")
+            if form_data.get('apply_unit') not in es_name and form_data.get('apply_permission')=='上传员':
+                return error_page(request, "来源机构只能申请上传员")
+            notify.send(
+                request.user,
+                recipient=User.objects.filter(is_superuser=1),
+                verb='代表'+form_data.get('apply_unit') + '申请' + form_data.get('apply_permission') + '权限',
+            )
+            ApplyList.objects.create(user=request.user, apply_permission=form_data.get('apply_permission'), apply_unit=form_data.get('apply_unit'), validation=form_data.get('validation'))
+            return redirect("user:permissionApply")
+        else:
+            return HttpResponse("表单内容有误，请重新填写。")
+    else:
+        apply_form = PermissionApplyForm()
+        sources = EventSource.objects.all()
+        units = DisposeUnit.objects.all()
+        apply_permissions = ['处理员','上传员']
+        context = {
+            'form': PermissionApplyForm,
+            'sources': sources,
+            'units': units,
+            'apply_permissions':apply_permissions,
+        }
+        return render(request, 'user/permissionapply.html', context)
+
+def view_permission(request):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    dispose_profiles = Profile.objects.filter(is_disposer=True)
+    post_profiles = Profile.objects.filter(is_poster=True)
+    superusers = User.objects.filter(is_superuser=True)
+    applications = ApplyList.objects.all()
+    context = { 'dispose_profiles':dispose_profiles,
+                'post_profiles':post_profiles,
+                'superusers':superusers,
+                'applications':applications,
+               }
+    return render(request, 'user/permissionview.html', context)
+
+def permission_delete(request,id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    user = User.objects.get(id=id)
+    profile = Profile.objects.get(user=user)
+    notify.send(
+        request.user,
+        recipient=User.objects.filter(is_superuser=1),
+        verb='撤除了' + profile.user.username + '关于' + profile.unit + '的权限',
+    )
+    notify.send(
+        request.user,
+        recipient=profile.user,
+        verb='撤除了' + '你' + '关于' + profile.unit + '的权限',
+    )
+    profile.is_poster = False
+    profile.is_disposer = False
+    profile.unit = ''
+    profile.save()
+    return redirect(to='user:permissionView')
+
+def reject_permission(request, id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    user = User.objects.get(id=id)
+    application = ApplyList.objects.get(user=user)
+    notify.send(
+        request.user,
+        recipient=User.objects.filter(is_superuser=1),
+        verb='拒绝了' + application.user.username + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    notify.send(
+        request.user,
+        recipient=application.user,
+        verb='拒绝了' + '你' + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    application.delete()
+    return redirect(to='user:permissionView')
+
+def accept_permission(request, id):
+    if not request.user.is_superuser:
+        return error_page(request,'您没有权限进行此操作')
+    user = User.objects.get(id=id)
+    profile = Profile.objects.get(user=user)
+    application = ApplyList.objects.get(user=user)
+    if application.apply_permission == '处理员':
+        profile.is_disposer = True
+    else:
+        profile.is_poster = True
+    profile.unit = application.apply_unit
+    profile.save()
+    notify.send(
+        request.user,
+        recipient=User.objects.filter(is_superuser=1),
+        verb='接受了' + application.user.username + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    notify.send(
+        request.user,
+        recipient=application.user,
+        verb='接受了' + '你' + '关于' + application.apply_unit + '的' + application.apply_permission + '权限的申请',
+    )
+    application.delete()
+    return redirect(to='user:permissionView')
