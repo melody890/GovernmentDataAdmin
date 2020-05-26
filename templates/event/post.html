@@ -2,14 +2,14 @@
 {% load static %}
 {% block content %}
 <div class="my-3 my-md-5">
-    <div class="container">
+    <div class="container" style="height: 100%;width: 100%">
         <div class="page-header">
             <h1 class="page-title">
                 事件登记
             </h1>
         </div>
         <div class="col-12">
-            <form enctype="multipart/form-data" method="post" class="card">
+            <form enctype="multipart/form-data" method="post" class="card" style="background-color:rgba(255,255,255,0.5)">
             {% csrf_token %}
                 <div class="card-body">
                     <div class="row">
