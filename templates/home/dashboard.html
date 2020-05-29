@@ -5,7 +5,8 @@
     <div class="container">
         <div class="row row-cards">
             <div class="col-md-6 col-lg-3">
-                <div class="card">
+                <div class="row row-cards">
+                <div class="card" style="background-color:rgba(255,255,255,0.5);width: 17.6rem">
                     <div class="card-body">
                         <div class="card-value float-right text-yellow">9%</div>
                         <h3 class="mb-1">423</h3>
@@ -21,9 +22,27 @@
                         </script>
                     </div>
                 </div>
+                <div class="card" style="background-color:rgba(255,255,255,0.5);width: 17.6rem">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">92件</div>
+                        <h3 class="mb-1" style="font-size: 14px">坪山街道</h3>
+                        <div class="text-muted">今日事件最多街道</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="street-chart" style="height: 100%"></div>
+                        <script>
+                            let street_chart = echarts.init(
+                                document.getElementById('street-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            street_chart.setOption({{ street_bar | safe}});
+                        </script>
+                    </div>
+                </div>
+                </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card">
+                <div class="row row-cards">
+                <div class="card" style="background-color:rgba(255,255,255,0.5);width: 17.7rem;height: 9.5rem">
                     <div class="card-body">
                         <div class="card-value float-right text-yellow">9%</div>
                         <h3 class="mb-1">423</h3>
@@ -39,17 +58,30 @@
                         </script>
                     </div>
                 </div>
+                <div class="card" style="background-color:rgba(255,255,255,0.5);width: 17.7rem; height: 9.5rem">
+                    <div class="card-body">
+                        <div class="text-muted">今日关键词</div>
+                        <div id="word_cloud" style="height: 100%"></div>
+                        <script>
+                            let wordcloud_chart = echarts.init(
+                                document.getElementById('word_cloud'), 'white', {renderer: 'canvas'}
+                            );
+                            wordcloud_chart.setOption({{ word_cloud | safe}});
+                        </script>
+                    </div>
+                </div>
+                </div>
             </div>
             <!-- 图表 -->
             <div class="col-md-6">
                 <div class="row">
                     <div class="col-sm-6">
-                        <div class="card">
+                        <div class="card" style="background-color:rgba(255,255,255,0.5)">
                             <div class="card-header">
                                 <h3 class="card-title">今日事件性质</h3>
                             </div>
                             <div class="card-body">
-                                <div id="pie-chart" style="height: 12rem;"></div>
+                                <div id="pie-chart" style="height: 14rem;"></div>
                                 <script>
                                     let pie_chart = echarts.init(
                                         document.getElementById('pie-chart'), 'white', {renderer: 'canvas'}
@@ -60,20 +92,26 @@
                         </div>
                     </div>
                     <div class="col-sm-6">
-                        <div class="card">
+                        <div class="card" style="background-color:rgba(255,255,255,0.5)">
                             <div class="card-header">
-                                <h3 class="card-title">Chart title</h3>
+                                <h3 class="card-title">近7日完成事件</h3>
                             </div>
                             <div class="card-body">
-                                <div id="chart-pie" style="height: 12rem;"></div>
+                                <div id="gauge-chart" style="height: 14rem;"></div>
+                                <script>
+                                    let gauge_chart = echarts.init(
+                                        document.getElementById('gauge-chart'), 'white', {renderer: 'canvas'}
+                                        );
+                                    gauge_chart.setOption({{ gauge_chart | safe}});
+                                </script>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {#最近事件统计图#}
+<!--            {#最近事件统计图#}-->
             <div class="col-md-6 col-xl-12">
-                <div class="card">
+                <div class="card" style="background-color:rgba(255,255,255,0.5)">
                     <div class="card-header">
                         <h3 class="card-title">Line</h3>
                     </div>
@@ -108,7 +146,7 @@
             </div>
             <!-- 实时事件列表 -->
             <div class="col-12">
-                <div class="card">
+                <div class="card" style="background-color:rgba(255,255,255,0.5)">
                     <div class="card-header">
                         <h3 class="card-title">实时事件列表</h3>
                     </div>
