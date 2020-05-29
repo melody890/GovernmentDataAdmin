@@ -60,14 +60,12 @@ def event_post(request):
     flag = False
     if Profile.objects.filter(user=request.user).exists():
         flag =Profile.objects.get(user=request.user).is_poster
-    if not flag:
+    if (not flag) and (not request.user.is_superuser):
         return error_page(request,'您没有权限进行此操作')
     if request.method == 'POST':
         event_post_form = EventForm(request.POST)
         if event_post_form.is_valid():
             form_data = event_post_form.cleaned_data
-            if form_data.get('event_src')!=Profile.objects.get(user=request.user).unit:
-                return error_page(request, '您没有权限进行此操作')
             new_event = Event()
             new_event.author = User.objects.get(id=request.user.id)
             new_event.property = Property.objects.get(name=form_data['property'])
@@ -133,7 +131,8 @@ def event_list(request):
         profile = Profile.objects.get(user=request.user)
     else:
         profile = Profile.objects.create(user=request.user)
-    flag = profile.is_disposer
+    flag = (profile.is_disposer or request.user.is_superuser)
+    print(flag)
     unit = profile.unit
     get_key = request.GET.get
     events = Event.objects.all()

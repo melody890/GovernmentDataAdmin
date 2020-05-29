@@ -294,14 +294,6 @@ def apply_permission(request):
                 return error_page(request, "你已经拥有上传员权限")
             if request.user.is_superuser:
                 return error_page(request, "你已经拥有"+form_data.get('apply_permission')+"权限")
-            es = EventSource.objects.all()
-            es_name = []
-            for unit in es:
-                es_name.append(unit.name)
-            if form_data.get('apply_unit') in es_name and form_data.get('apply_permission')=='处理员':
-                return error_page(request, "处理机构只能申请处理员")
-            if form_data.get('apply_unit') not in es_name and form_data.get('apply_permission')=='上传员':
-                return error_page(request, "来源机构只能申请上传员")
             notify.send(
                 request.user,
                 recipient=User.objects.filter(is_superuser=1),
