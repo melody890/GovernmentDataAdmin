@@ -18,8 +18,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 
 from .forms import UserLoginForm, UserRegisterForm, ProfileForm, ResetForm, ResetPwForm, PermissionApplyForm
-from .models import Profile, ConfirmString, ApplyList
-from event.models import EventSource, DisposeUnit
+from .models import Profile, ConfirmString, ApplyList, DisposeRecord, PostRecord
+from event.models import EventSource, DisposeUnit, Event
 
 from home.views import error_page
 
@@ -106,6 +106,21 @@ def profile_edit(request, id):
 
     apply_list = ApplyList.objects.all()
 
+    dispose_record = DisposeRecord.objects.filter(disposer=request.user.username)
+    post_record = PostRecord.objects.filter(poster=request.user.username)
+
+    dispose_events = []
+    for record in reversed(dispose_record):
+        if Event.objects.filter(rec_id=record.eventID).exists():
+            event = Event.objects.get(rec_id=record.eventID)
+        dispose_events.append(event)
+
+    post_events = []
+    for record in reversed(post_record):
+        if Event.objects.filter(rec_id=record.eventID).exists():
+            event = Event.objects.get(rec_id=record.eventID)
+        post_events.append(event)
+
     if Profile.objects.filter(user_id=id).exists():
         profile = Profile.objects.get(user_id=id)
     else:
@@ -142,11 +157,12 @@ def profile_edit(request, id):
             'user': user,
             'notices': notices,
             'apply_list':apply_list,
+            'post_events':post_events[:20],
+            'dispose_events':dispose_events[:20],
         }
         return render(request, 'user/edit.html', context)
     else:
         return error_page(request, "请使用GET或POST请求数据。")
-
 
 def make_confirm_string(user):
     code = str(uuid4())

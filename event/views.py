@@ -9,7 +9,7 @@ from django.apps import apps
 from home.views import error_page
 from .forms import EventForm
 from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType, MainType
-from user.models import Profile
+from user.models import Profile, PostRecord, DisposeRecord
 
 filter_value = ["status", "type", "property", "street", "source", "maintype", "community"]
 
@@ -74,6 +74,11 @@ def event_post(request):
             new_event.sub_type = SubType.objects.get(name=form_data['sub_type'])
             new_event.dispose_unit = DisposeUnit.objects.get(name=form_data['dispose_unit'])
             new_event.save()
+            new_post_record = PostRecord.objects.create()
+            new_post_record.poster = request.user.username
+            new_post_record.eventID = new_event.rec_id
+            print(new_post_record)
+            new_post_record.save()
             return redirect(to="event:post")
         else:
             return HttpResponse("表单内容有误，请重新填写。")

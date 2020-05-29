@@ -1,9 +1,11 @@
 from channels.generic.websocket import WebsocketConsumer
 from django.db.models import Q
+from django.contrib.auth.models import User
 import json
 
 from .models import MainType, Type, Street, Event, Achieve
 from .views import my_filter
+from user.models import DisposeRecord
 
 
 class PostDataConsumer(WebsocketConsumer):
@@ -59,9 +61,15 @@ class ListDataConsumer(WebsocketConsumer):
         text_data_json = json.loads(text_data)
         status = text_data_json['status']
         rec_id = int(text_data_json['rec_id'])
+        dispose_user = text_data_json['dispose_user']
         event = Event.objects.get(rec_id=rec_id)
         achieve = Achieve.objects.get(status=status)
         event.achieve = achieve
         event.save()
+        print(event)
+        user = User.objects.get(username=dispose_user)
+        new_dispose_record = DisposeRecord.objects.create(disposer=user.username,eventID=event.rec_id)
+        new_dispose_record.save()
+
 
         self.send(text_data=json.dumps({}))
