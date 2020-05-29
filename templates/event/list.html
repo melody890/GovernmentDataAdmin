@@ -86,8 +86,8 @@
                         <td>{{ event.event_src }}</td>
                         {% if event.achieve.status == 'intime_to' %}
                             <td class="achieve"><span class="status-icon bg-primary"></span>处理中</td>
-                            {% if flag and unit == event.dispose_unit.name %}
-                            <td class="status"><button class="btn btn-info btn-sm" onclick="dispose('intime', '{{ event.rec_id }}')">按期</button>&nbsp;&nbsp;<button class="btn btn-danger btn-sm" onclick="dispose('overtime', '{{ event.rec_id }}')"><i class="ti-close text-danger m-r-5"></i>逾期</button></td>
+                            {% if flag %}
+                            <td class="status"><button class="btn btn-info btn-sm" onclick="dispose('intime', '{{ event.rec_id }}', '{{ user.username }}')">按期</button>&nbsp;&nbsp;<button class="btn btn-danger btn-sm" onclick="dispose('overtime', '{{ event.rec_id }}', '{{ user.username }}')"><i class="ti-close text-danger m-r-5"></i>逾期</button></td>
                             {% endif %}
                         {% elif event.achieve.status == 'intime' %}
                             <td class><span class="status-icon bg-success"></span>按期办结</td>
@@ -130,14 +130,15 @@
 
 {% block script %}
     <script type="text/javascript">
-        function dispose(status, eventID) {
+        function dispose(status, eventID, dispose_user) {
             let eventList = document.querySelectorAll("tr.event");
             if ("WebSocket" in window) {
                 let ws = new WebSocket("ws://"+ window.location.host + "/ws/event/list/");
                 ws.onopen = function () {
                     ws.send(JSON.stringify({
                         'rec_id': eventID,
-                        'status': status
+                        'status': status,
+                        'dispose_user': dispose_user
                     }));
                 };
                 for (let i=0; i < eventList.length; i++) {
