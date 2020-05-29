@@ -16,12 +16,23 @@
     <link rel="icon" href="{% static 'assets/images/icon.png' %}" type="image/x-icon"/>
     <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/icon.png' %}" />
     <style type="text/css">
-        #tag-cloud{
-            width:840px;
-            height:880px;
+        #tag-cloud {
+            width: 840px;
+            height: 880px;
             margin: 50px auto;
         }
     </style>
+<!--    <style>-->
+<!--         .background{-->
+<!--            width: 100%;-->
+<!--            height: 100%;-->
+<!--            background-image: url(/static/assets/images/background.jpg);-->
+<!--            background-size: 100%, 100%;-->
+<!--            background-repeat: no-repeat;-->
+<!--            background-attachment: fixed;-->
+<!--            background-color:rgba(255,255,255,0.5);-->
+<!--        }-->
+<!--    </style>-->
     <title>Government System</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext">
@@ -60,18 +71,20 @@
 </head>
 
 <body class="">
-    <div id="page">
-        <div class="flex-fill">
-            <!-- Top_bar header -->
-            {% include 'header.html' %}
-            <!-- End Top Navigation -->
-            <!-- Page Content -->
-            {% block content %}{% endblock content %}
-            <!-- End Page Content -->
+    <div class="background" style="background:url(/static/assets/images/background.jpg);background-size: 100%,50%;background-attachment: fixed">
+        <div id="page" style="background: rgba(255,255,255,0.5);size: auto">
+            <div class="flex-fill">
+                <!-- Top_bar header -->
+                {% include 'header.html' %}
+                <!-- End Top Navigation -->
+                <!-- Page Content -->
+                {% block content %}{% endblock content %}
+                <!-- End Page Content -->
+            </div>
+            <!-- Footer -->
+            {% include 'footer.html' %}
+            <!-- End Footer -->
         </div>
-        <!-- Footer -->
-        {% include 'footer.html' %}
-        <!-- End Footer -->
     </div>
     {% block script %}{% endblock script %}
 </body>

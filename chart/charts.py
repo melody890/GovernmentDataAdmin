@@ -15,7 +15,7 @@ BAIDU_MAP_AK = 'X3ATCKQWRjRxLNLI1Wv9NiTMFAa5bh8W'
 
 
 def get_date(days):
-    day = (date.today() - timedelta(days=495) - timedelta(days=days))
+    day = (date.today() - timedelta(days=555) - timedelta(days=days))
     return day
 
 
