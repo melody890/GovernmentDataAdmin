@@ -2,10 +2,17 @@
 <project version="4">
   <component name="PublishConfigData" autoUpload="Always" serverName="hude">
     <serverData>
+      <paths name="0524">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="hude">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/pycharm_project_652" local="$PROJECT_DIR$" />
+            <mapping deploy="/tmp/pycharm_project_722" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

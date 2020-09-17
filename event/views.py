@@ -9,7 +9,7 @@ from django.apps import apps
 from home.views import error_page
 from .forms import EventForm
 from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType, MainType
-from user.models import Profile
+from user.models import Profile, PostRecord, DisposeRecord
 
 filter_value = ["status", "type", "property", "street", "source", "maintype", "community"]
 
@@ -60,14 +60,12 @@ def event_post(request):
     flag = False
     if Profile.objects.filter(user=request.user).exists():
         flag =Profile.objects.get(user=request.user).is_poster
-    if not flag:
+    if (not flag) and (not request.user.is_superuser):
         return error_page(request,'您没有权限进行此操作')
     if request.method == 'POST':
         event_post_form = EventForm(request.POST)
         if event_post_form.is_valid():
             form_data = event_post_form.cleaned_data
-            if form_data.get('event_src')!=Profile.objects.get(user=request.user).unit:
-                return error_page(request, '您没有权限进行此操作')
             new_event = Event()
             new_event.author = User.objects.get(id=request.user.id)
             new_event.property = Property.objects.get(name=form_data['property'])
@@ -76,6 +74,11 @@ def event_post(request):
             new_event.sub_type = SubType.objects.get(name=form_data['sub_type'])
             new_event.dispose_unit = DisposeUnit.objects.get(name=form_data['dispose_unit'])
             new_event.save()
+            new_post_record = PostRecord.objects.create()
+            new_post_record.poster = request.user.username
+            new_post_record.eventID = new_event.rec_id
+            print(new_post_record)
+            new_post_record.save()
             return redirect(to="event:post")
         else:
             return HttpResponse("表单内容有误，请重新填写。")
@@ -133,7 +136,8 @@ def event_list(request):
         profile = Profile.objects.get(user=request.user)
     else:
         profile = Profile.objects.create(user=request.user)
-    flag = profile.is_disposer
+    flag = (profile.is_disposer or request.user.is_superuser)
+    print(flag)
     unit = profile.unit
     get_key = request.GET.get
     events = Event.objects.all()
