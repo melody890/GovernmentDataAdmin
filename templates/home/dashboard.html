@@ -5,6 +5,7 @@
     <div class="container">
         <div class="row row-cards">
             <div class="col-md-6 col-lg-3">
+                <div class="row row-cards">
                 <div class="card" style="background-color:rgba(255,255,255,0.5)">
                     <div class="card-body">
                         <div class="card-value float-right text-yellow">9%</div>
@@ -20,6 +21,23 @@
                             post_chart.setOption({{ post_line | safe}});
                         </script>
                     </div>
+                </div>
+                <div class="card" style="background-color:rgba(255,255,255,0.5)">
+                    <div class="card-body">
+                        <div class="card-value float-right text-yellow">9%</div>
+                        <h3 class="mb-1">423</h3>
+                        <div class="text-muted">今日登记事件</div>
+                    </div>
+                    <div class="card-chart-bg">
+                        <div id="post-chart" style="height: 90%"></div>
+                        <script>
+                            let post_chart = echarts.init(
+                                document.getElementById('post-chart'), 'white', {renderer: 'canvas'}
+                            );
+                            post_chart.setOption({{ post_line | safe}});
+                        </script>
+                    </div>
+                </div>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
