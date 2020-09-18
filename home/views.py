@@ -64,19 +64,20 @@ def index_pie() -> Pie:
 
 
 def index_gauge() -> Gauge:
-    date_list = get_recent_date(7)
-    #分别记录全部事件数目和完成事件数目
-    all_event_count = 0
-    done_event_count = 0
-    for date in date_list:
-        format_date = date.strftime('%Y-%m-%d')
-        sql = Event.objects.filter(create_time=format_date).values('achieve').annotate(count=Count('achieve')).values('achieve','count').order_by('achieve')
-        achieve = list(sql)
-        # print(achieve[0]['count'])
-    all_event_count = all_event_count + achieve[0]['count'] + achieve[1]['count']
-    done_event_count = done_event_count + achieve[0]['count']
+    # date_list = get_recent_date(7)
+    # #分别记录全部事件数目和完成事件数目
+    # all_event_count = 0
+    # done_event_count = 0
+    # for date in date_list:
+    #     format_date = date.strftime('%Y-%m-%d')
+    #     sql = Event.objects.filter(create_time=format_date).values('achieve').annotate(count=Count('achieve')).values('achieve','count').order_by('achieve')
+    #     achieve = list(sql)
+    #     # print(achieve[0]['count'])
+    # all_event_count = all_event_count + achieve[0]['count'] + achieve[1]['count']
+    # done_event_count = done_event_count + achieve[0]['count']
 
-    done_percent = (done_event_count/all_event_count)
+    # done_percent = (done_event_count/all_event_count)
+    done_percent = 0
     done_percent = round(done_percent*100,1)
 
     c = (

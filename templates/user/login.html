@@ -1,84 +1,190 @@
 {% load static %}
-<!doctype html>
-<html lang="zh" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta http-equiv="Content-Language" content="en" />
-    <meta name="msapplication-TileColor" content="#2d89ef">
-    <meta name="theme-color" content="#4188c9">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="HandheldFriendly" content="True">
-    <meta name="MobileOptimized" content="320">
-    <link rel="icon" href="{% static 'assets/images/icon.png' %}" type="image/x-icon"/>
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/icon.png' %}" />
-    <!-- Generated: 2019-04-04 16:55:45 +0200 -->
-    <title>Login-Government Data Admin</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext">
-      <!-- Dashboard Core -->
-    <link href="{% static 'assets/css/dashboard.css' %}" rel="stylesheet" />
-    <script src="{% static 'assets/js/dashboard.js' %}"></script>
-    <!-- c3.js Charts Plugin -->
-    <link href="{% static 'assets/plugins/charts-c3/plugin.css' %}" rel="stylesheet" />
-    <script src="{% static 'assets/plugins/charts-c3/plugin.js' %}"></script>
-    <!-- Google Maps Plugin -->
-    <link href="{% static 'assets/plugins/maps-google/plugin.css' %}" rel="stylesheet" />
-    <script src="{% static 'assets/plugins/maps-google/plugin.js' %}"></script>
-    <!-- Input Mask Plugin -->
-    <script src="{% static 'assets/plugins/input-mask/plugin.js' %}"></script>
-    <!-- Datatables Plugin -->
-    <script src="{% static 'assets/plugins/datatables/plugin.js' %}"></script>
-</head>
-<body class="">
-    <div class="page">
-        <div class="page-single">
-            <div class="container">
-                <div class="row">
-                    <div class="col col-login mx-auto">
-                        <div class="text-center mb-6">
-                            <img src="{% static 'assets/images/tabler.svg' %}" class="h-9" alt="">
-                        </div>
-                        <form class="card" action="" method="post">
-                            {% csrf_token %}
-                            <div class="card-body p-6">
-                                <div class="card-title">登录</div>
-                                <div class="form-group">
-                                    <label class="form-label" for="username">用户名</label>
-                                    <input type="text" class="form-control" id="username" name="username" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="password">
-                                        密码
-                                        <a href="{% url 'user:reset' %}" class="float-right small">忘记密码？</a>
-                                    </label>
-                                    <input type="password" class="form-control" id="password" name="password" required>
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label" for="captcha">
-                                        验证码
-                                    </label>
-                                        {{ form.captcha }}
-                                </div>
-                                <div class="form-footer">
-                                    <button type="submit" class="btn btn-primary btn-block">登录</button>
-                                </div>
-                            </div>
-                        </form>
-                        <div class="text-center text-muted">
-                            还没有账号吗? 点击<a href="{% url 'user:register' %}">注册</a>
-                        </div>
-                        <div class="text-center text-muted">
-                             <span>第三方账号登录：</span>
-                             <a href="{% url 'social:begin' 'github' %}" title="Github登录">Github</a>
-                            </div>
-                        </div>
+<!--<!doctype html>-->
+<!--<html lang="zh" dir="ltr">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+<!--    <meta http-equiv="Content-Language" content="en" />-->
+<!--    <meta name="msapplication-TileColor" content="#2d89ef">-->
+<!--    <meta name="theme-color" content="#4188c9">-->
+<!--    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>-->
+<!--    <meta name="apple-mobile-web-app-capable" content="yes">-->
+<!--    <meta name="mobile-web-app-capable" content="yes">-->
+<!--    <meta name="HandheldFriendly" content="True">-->
+<!--    <meta name="MobileOptimized" content="320">-->
+<!--    <link rel="icon" href="{% static 'assets/images/icon.png' %}" type="image/x-icon"/>-->
+<!--    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/icon.png' %}" />-->
+<!--    &lt;!&ndash; Generated: 2019-04-04 16:55:45 +0200 &ndash;&gt;-->
+<!--    <title>Login-Government Data Admin</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">-->
+<!--    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext">-->
+<!--      &lt;!&ndash; Dashboard Core &ndash;&gt;-->
+<!--    <link href="{% static 'assets/css/dashboard.css' %}" rel="stylesheet" />-->
+<!--    <script src="{% static 'assets/js/dashboard.js' %}"></script>-->
+<!--    &lt;!&ndash; c3.js Charts Plugin &ndash;&gt;-->
+<!--    <link href="{% static 'assets/plugins/charts-c3/plugin.css' %}" rel="stylesheet" />-->
+<!--    <script src="{% static 'assets/plugins/charts-c3/plugin.js' %}"></script>-->
+<!--    &lt;!&ndash; Google Maps Plugin &ndash;&gt;-->
+<!--    <link href="{% static 'assets/plugins/maps-google/plugin.css' %}" rel="stylesheet" />-->
+<!--    <script src="{% static 'assets/plugins/maps-google/plugin.js' %}"></script>-->
+<!--    &lt;!&ndash; Input Mask Plugin &ndash;&gt;-->
+<!--    <script src="{% static 'assets/plugins/input-mask/plugin.js' %}"></script>-->
+<!--    &lt;!&ndash; Datatables Plugin &ndash;&gt;-->
+<!--    <script src="{% static 'assets/plugins/datatables/plugin.js' %}"></script>-->
+<!--</head>-->
+<!--<body class="">-->
+<!--    <div class="page">-->
+<!--        <div class="page-single">-->
+<!--            <div class="container">-->
+<!--                <div class="row">-->
+<!--                    <div class="col col-login mx-auto">-->
+<!--                        <div class="text-center mb-6">-->
+<!--                            <img src="{% static 'assets/images/tabler.svg' %}" class="h-9" alt="">-->
+<!--                        </div>-->
+<!--                        <form class="card" action="" method="post">-->
+<!--                            {% csrf_token %}-->
+<!--                            <div class="card-body p-6">-->
+<!--                                <div class="card-title">登录</div>-->
+<!--                                <div class="form-group">-->
+<!--                                    <label class="form-label" for="username">用户名</label>-->
+<!--                                    <input type="text" class="form-control" id="username" name="username" required>-->
+<!--                                </div>-->
+<!--                                <div class="form-group">-->
+<!--                                    <label class="form-label" for="password">-->
+<!--                                        密码-->
+<!--                                        <a href="{% url 'user:reset' %}" class="float-right small">忘记密码？</a>-->
+<!--                                    </label>-->
+<!--                                    <input type="password" class="form-control" id="password" name="password" required>-->
+<!--                                </div>-->
+<!--                                <div class="form-group">-->
+<!--                                    <label class="form-label" for="captcha">-->
+<!--                                        验证码-->
+<!--                                    </label>-->
+<!--                                        {{ form.captcha }}-->
+<!--                                </div>-->
+<!--                                <div class="form-footer">-->
+<!--                                    <button type="submit" class="btn btn-primary btn-block">登录</button>-->
+<!--                                </div>-->
+<!--                            </div>-->
+<!--                        </form>-->
+<!--                        <div class="text-center text-muted">-->
+<!--                            还没有账号吗? 点击<a href="{% url 'user:register' %}">注册</a>-->
+<!--                        </div>-->
+<!--                        <div class="text-center text-muted">-->
+<!--                             <span>第三方账号登录：</span>-->
+<!--                             <a href="{% url 'social:begin' 'github' %}" title="Github登录">Github</a>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--    {#  验证码动态刷新  #}-->
+<!--    <script src="\static\assets\js\vendors\jquery-3.2.1.min.js"></script>-->
+<!--    <script>-->
+<!--        $(function(){-->
+<!--        $('.captcha').css({-->
+<!--            'cursor': 'pointer'-->
+<!--        })-->
+<!--        $('.captcha').click(function(){-->
+<!--            console.log('click');-->
+<!--             $.getJSON("/captcha/refresh/",-->
+<!--                      function(result){-->
+<!--                 $('.captcha').attr('src', result['image_url']);-->
+<!--                 $('#id_captcha_0').val(result['key'])-->
+<!--              });});-->
+<!--        $('#id_captcha_1').blur(function(){-->
+<!--            json_data={-->
+<!--                'response':$('#id_captcha_1').val(),-->
+<!--                'hashkey':$('#id_captcha_0').val()-->
+<!--            }-->
+<!--            $.getJSON('/user/ajaxval', json_data, function(data){-->
+<!--                if(data['status']){-->
+<!--                    $('#id_captcha_1').after()-->
+<!--                }else{-->
+<!--                     $('#id_captcha_1').after()-->
+<!--                }-->
+<!--            });-->
+<!--        });-->
+<!--        })-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>登录</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static 'vendors/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{% static 'vendors/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="{% static 'vendors/nprogress/nprogress.css' %}" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="{% static 'vendors/animate.css/animate.min.css' %}" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="{% static 'build/css/custom.min.css' %}" rel="stylesheet">
+  </head>
+  <body class="login">
+    <div>
+      <a class="hiddenanchor" id="signup"></a>
+      <a class="hiddenanchor" id="signin"></a>
+
+      <div class="login_wrapper">
+        <div class="animate form login_form">
+          <section class="login_content">
+            <form method="post">
+              {% csrf_token %}
+              <h1><i class="fa fa-institution"></i> 政务大数据平台</h1>
+              <div>
+                <input type="text" class="form-control" placeholder="账户" required=""  id="username" name="username">
+              </div>
+              <div>
+                <input type="password" class="form-control" placeholder="密码" required="" id="password" name="password">
+              </div>
+              <div>
+                {{ form.captcha }}
+              </div>
+              <div>
+                <button type="submit" class="btn btn-secondary btn-xs">登 录</button>
+
+              </div>
+
+              <div class="clearfix"></div>
+
+              <div class="separator">
+                <div class="text-center text-muted">
+                   <span>第三方账号登录：</span>
+                   <a href="{% url 'social:begin' 'github' %}" title="Github登录">Github</a>
                 </div>
-            </div>
+                <div class="clearfix"></div>
+                <br/>
+                <div>
+                  <a href="{% url 'user:register' %}" class="to_register"> 创建账户 </a>
+                  <a href="{% url 'user:reset' %}" class="to_register"> 找回密码 </a>
+                </div>
+                <br/>
+
+                <div>
+                  <p>©2020 GovernmentDataAdmin</p>
+                </div>
+              </div>
+            </form>
+          </section>
         </div>
+
+
+      </div>
     </div>
     {#  验证码动态刷新  #}
     <script src="\static\assets\js\vendors\jquery-3.2.1.min.js"></script>
@@ -109,5 +215,5 @@
         });
         })
     </script>
-</body>
+  </body>
 </html>

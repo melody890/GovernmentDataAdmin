@@ -166,4 +166,5 @@ SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/user/login'
 
 # 自定义验证码模板
 CAPTCHA_TEXT_FIELD_TEMPLATE = BASE_DIR + '/templates/user/captcha.html'
+CAPTCHA_IMAGE_SIZE = (80,40)
 CAPTCHA_OUTPUT_FORMAT = '%(text_field)s %(hidden_field)s %(image)s'
