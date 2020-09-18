@@ -1,129 +1,64 @@
 {% load static %}
-<div class="header py-4">
-    <div class="container">
-        <div class="d-flex">
-            <a class="header-brand" href="#">
-                <img src="{% static 'assets/images/tabler1.svg' %}" class="header-brand-img" alt="tabler logo">
-            </a>
-            <div class="d-flex order-lg-2 ml-auto">
-                <div class="dropdown d-none d-md-flex">
-                    <a class="nav-link icon" data-toggle="dropdown">
-                        <i class="fe fe-bell"></i>
-                        {% if user.notifications.unread %}
-                            <span class="nav-unread"></span>
-                        {% endif %}
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                    {% if user.notifications.unread %}
-                        {% for notice in user.notifications.unread %}
-                            <a href="{% url 'user:edit' user.id %}" class="dropdown-item d-flex">
-                              <div>
-                                <strong>{{ notice.actor }}</strong> {{ notice.verb }}
-                                <div class="small text-muted">{{ notice.timestamp|date:"Y/m/d H:i" }}</div>
-                              </div>
-                            </a>
-                        {% endfor %}
-                    {% else %}
-                          <div>
-                            <strong>暂时没有通知</strong>
-                          </div>
-                    {% endif %}
-                  </div>
-                </div>
-                <div class="dropdown">
-                    <a class="nav-link pr-0 leading-none" data-toggle="dropdown">
-                        {% if user.profile.avatar %}
-                            <span class="avatar" style="background-image: url({{ user.profile.avatar.url }})"></span>
-                        {% else %}
-                            <span class="avatar" style="background-image: url({% static 'assets/images/admin.png' %})"></span>
-                        {% endif %}
-                        <span class="ml-2 d-none d-lg-block">
-                            <span class="text-default">{{ user.username }}</span>
-                            <small class="text-muted d-block mt-1">Administrator</small>
-                        </span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                        <a class="dropdown-item" href="{% url 'user:edit' user.id %}">
-                            <i class="dropdown-icon fe fe-user"></i> Profile
-                        </a>
-                        {% if user.is_superuser %}
-                            <a class="dropdown-item" href="{% url 'user:permissionView'%}">
-                                <i class="dropdown-icon fe fe-settings"></i> Permission
-                            </a>
-                        {% else %}
-                            <a class="dropdown-item" href="{% url 'user:permissionApply'%}">
-                                <i class="dropdown-icon fe fe-settings"></i> Permission
-                            </a>
-                        {% endif %}
-                        <a class="dropdown-item" href="#">
-                            <span class="float-right"><span class="badge badge-primary">6</span></span>
-                            <i class="dropdown-icon fe fe-mail"></i> Inbox
-                        </a>
-                        <a class="dropdown-item" href="#">
-                            <i class="dropdown-icon fe fe-send"></i> Message
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">
-                            <i class="dropdown-icon fe fe-help-circle"></i> Need help?
-                        </a>
-                        <a class="dropdown-item" href="{% url 'user:logout' %}">
-                            <i class="dropdown-icon fe fe-log-out"></i> Sign out
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <a href="#" class="header-toggler d-lg-none ml-3 ml-lg-0" data-toggle="collapse" data-target="#headerMenuCollapse">
-                <span class="header-toggler-icon"></span>
-            </a>
-        </div>
-    </div>
-</div>
-<div class="header collapse d-lg-flex p-0" id="headerMenuCollapse">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="input-icon my-3 my-lg-0">
-            {% if cur_page == 'kgraph' %}
-                <form method="get" class="input-icon my-3 my-lg-0">
-                    <div class="input-group">
-                        {% if kg_search %}
-                            <input type="search" name="search" id="kgsearch_id" class="form-control header-search" value="{{ kg_search }}" tabindex="1" required>
-                        {% else %}
-                            <input type="search" name="search" id="kgsearch_id" class="form-control header-search" placeholder="Search&hellip;" tabindex="1" required>
-                        {% endif %}
-                        <span class="input-group-append">
-                            <button class="btn btn-secondary" type="button" onclick="kgsearch()">
-                                <i class="fe fe-search"></i>
-                            </button>
-                            <script type="text/javascript">
-                                function kgsearch() {
-                                    let searchBar = document.getElementById("kgsearch_id");
-                                    self.location.href = "http://" + self.location.host + "/kgraph?search=" + searchBar.value;
-                                }
-                            </script>
-                        </span>
-                    </div>
-                </form>
+<div class="top_nav" style="height: 10px">
+  <div class="nav_menu">
+      <nav class="nav navbar-nav">
+      <ul class=" navbar-right">
+        <li class="nav-item dropdown open" style="padding-left: 15px;">
+          <a href="javascript:;" class="user-profile dropdown-toggle" aria-haspopup="true" id="navbarDropdown" data-toggle="dropdown" aria-expanded="false">
+<!--            {% if user.profile.avatar %}-->
+<!--              <span class="avatar" style="background-image: url({{ user.profile.avatar.url }})"></span>-->
+<!--            {% else %}-->
+<!--              <span class="avatar" style="background-image: url({% static 'assets/images/admin.png' %})"></span>-->
+<!--            {% endif %}-->
+            <img src="https://dss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2443852970,3855863032&fm=26&gp=0.jpg" alt="">{{ user.username }}
+          </a>
+          <div class="dropdown-menu dropdown-usermenu pull-right" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item"  href="{% url 'user:edit' user.id %}"><i class="fa fa-edit"></i>  个人主页 </a>
+          <a class="dropdown-item"  href="javascript:;"><i class="fa fa-list-ul"></i>  帮助</a>
+            <a class="dropdown-item"  href="{% url 'user:logout' %}"><i class="fa fa-sign-out pull-right"></i> 退出登录</a>
+          </div>
+        </li>
+
+        <li role="presentation" class="nav-item dropdown open">
+          <a href="javascript:;" class="dropdown-toggle info-number" id="navbarDropdown1" data-toggle="dropdown" aria-expanded="false">
+            <i class="fa fa-envelope-o"></i>
+            {% if user.notifications.unread %}
+              <span class="badge bg-green">!</span>
             {% endif %}
-            </div>
-            <div class="col-lg order-lg-first">
-                <ul class="nav nav-tabs border-0 flex-column flex-lg-row">
-                    <li class="nav-item">
-                        <a href="{% url 'home:dashboard' %}" class="nav-link {% if cur_page == 'dashboard' %} active {% endif %}"><i class="fe fe-home"></i> 首页</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'chart:charts' %}" class="nav-link {% if cur_page == 'charts' %} active {% endif %}"><i class="fe fe-pie-chart"></i> 图表</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'kgraph:kgraph' %}" class="nav-link {% if cur_page == 'kgraph' %} active {% endif %}"><i class="fe fe-map"></i> 知识图谱</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'event:post' %}" class="nav-link {% if cur_page == 'post' %} active {% endif %}"><i class="fe fe-upload-cloud"></i> 事件上传</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'event:list' %}" class="nav-link {% if cur_page == 'list' %} active {% endif %}"><i class="fe fe-list"></i> 事件列表</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+          </a>
+          <ul class="dropdown-menu list-unstyled msg_list" role="menu" aria-labelledby="navbarDropdown1">
+            {% if user.notifications.unread %}
+              {% for notice in user.notifications.unread %}
+                <a href="{% url 'user:edit' user.id %}">
+                  <li class="nav-item">
+                    <a class="dropdown-item">
+                      <span>
+                        <span>{{ notice.actor }}</span>
+                        <span class="time">{{ notice.timestamp|date:"Y/m/d H:i" }}</span>
+                      </span>
+                      <span class="message">
+                        {{ notice.verb }}
+                      </span>
+                    </a>
+                  </li>
+                </a>
+              {% endfor %}
+            {% else %}
+              <div>
+                <li class="nav-item">
+                  <a class="dropdown-item">
+                    <span class="message">
+                      暂时没有通知
+                    </span>
+                  </a>
+                </li>
+              </div>
+            {% endif %}
+
+
+          </ul>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </div>

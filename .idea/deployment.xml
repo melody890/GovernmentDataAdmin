@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" autoUpload="Always" serverName="hude">
+  <component name="PublishConfigData" autoUpload="Always" serverName="admin@134.175.209.4:22 password">
     <serverData>
       <paths name="0524">
         <serverdata>
@@ -9,10 +9,17 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="hude">
+      <paths name="0524 (1)">
         <serverdata>
           <mappings>
-            <mapping deploy="/tmp/pycharm_project_722" local="$PROJECT_DIR$" />
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="admin@134.175.209.4:22 password">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/pycharm_project_694" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

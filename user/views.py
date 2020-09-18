@@ -35,6 +35,8 @@ def user_login(request):
             if user_login_form.is_valid():
                 data = user_login_form.cleaned_data
                 user = authenticate(username=data['username'], password=data['password'])
+                print(data)
+                print(user)
                 if user:
                     login(request, user)
                     return redirect(to="home:dashboard")
@@ -171,7 +173,7 @@ def make_confirm_string(user):
 
 
 def confirm_email(mode, email, code, host, username):
-
+    print(mode, email, code, host, username)
     text_content = '''这里是政府大数据平台\
                         如果你看到这条消息，说明你的邮箱服务器不提供HTML链接功能，请联系管理员！'''     
 
