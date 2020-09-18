@@ -6,8 +6,10 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 from django.apps import apps
 
+from home.views import error_page
 from .forms import EventForm
 from .models import Property, Street, Type, EventSource, DisposeUnit, Event, Community, SubType, MainType
+from user.models import Profile, PostRecord, DisposeRecord
 
 filter_value = ["status", "type", "property", "street", "source", "maintype", "community"]
 
@@ -55,6 +57,11 @@ def update_number():
 
 @login_required(login_url='/user/login/')
 def event_post(request):
+    flag = False
+    if Profile.objects.filter(user=request.user).exists():
+        flag =Profile.objects.get(user=request.user).is_poster
+    if (not flag) and (not request.user.is_superuser):
+        return error_page(request,'您没有权限进行此操作')
     if request.method == 'POST':
         event_post_form = EventForm(request.POST)
         if event_post_form.is_valid():
@@ -67,6 +74,11 @@ def event_post(request):
             new_event.sub_type = SubType.objects.get(name=form_data['sub_type'])
             new_event.dispose_unit = DisposeUnit.objects.get(name=form_data['dispose_unit'])
             new_event.save()
+            new_post_record = PostRecord.objects.create()
+            new_post_record.poster = request.user.username
+            new_post_record.eventID = new_event.rec_id
+            print(new_post_record)
+            new_post_record.save()
             return redirect(to="event:post")
         else:
             return HttpResponse("表单内容有误，请重新填写。")
@@ -120,6 +132,13 @@ def my_filter(keyword, events_list):
 
 @login_required(login_url='/user/login/')
 def event_list(request):
+    if Profile.objects.filter(user=request.user).exists():
+        profile = Profile.objects.get(user=request.user)
+    else:
+        profile = Profile.objects.create(user=request.user)
+    flag = (profile.is_disposer or request.user.is_superuser)
+    print(flag)
+    unit = profile.unit
     get_key = request.GET.get
     events = Event.objects.all()
     filter_keywords = []
@@ -158,6 +177,8 @@ def event_list(request):
         "keywords":  filter_keywords,
         "url": re_url,
         'cur_page': "list",
+        'flag':flag,
+        'unit':unit,
     }
     return render(request, 'event/list.html', context)
 

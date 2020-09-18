@@ -47,13 +47,13 @@ def get_kgraph(request):
 
 def get_ajax(request):
     uname = request.GET.get('uname')
-    print(uname)
+    # print(uname)
     if uname:
         (model_name, model) = filter_model(uname)
         if model_name and model:
             model_name = model_name.__name__
-            print(model_name)
-            print(str(model))
+            # print(model_name)
+            # print(str(model))
             kgraph = graph(model_name, model)
         else:
             kgraph = ''
@@ -63,7 +63,7 @@ def get_ajax(request):
     context = {
         "graph": kgraph
     }
-    print(context)
+    # print(context)
 
     return JsonResponse(context)
 
@@ -136,12 +136,12 @@ def get_data(model_name, model):
 
 def create_node(source_node, categories, cate_name, nodes, node_name, links, link_name, node_value='-'):
     categories.append(opts.GraphCategory(cate_name))
-    print(cate_name)
+    # print(cate_name)
     length = len(categories) - 1
     nodes.append(opts.GraphNode(name=node_name, value=node_value, symbol_size=50, category=length))
-    print(node_name)
+    # print(node_name)
     links.append(opts.GraphLink(source=source_node, target=node_name, value=link_name))
-    print(link_name)
+    # print(link_name)
 
     return 0
 
@@ -478,7 +478,7 @@ def get_subtype_data(model_name, model):
     try:
         # 小类所属大类
         node_name = str(sub_model.main_type)
-        print(node_name)
+        # print(node_name)
         cate_name = '大类'
         link_name = '所属大类'
         source_node = str(model)
@@ -527,7 +527,7 @@ def get_subtype_data(model_name, model):
     return categories, nodes, links
 
 
-def get_disposeunit_data(model_name,model):
+def get_disposeunit_data(model_name, model):
     number_dis = str(model.number)
     categories = [opts.GraphCategory(name='执行部门')]
     nodes = [opts.GraphNode(name=str(model), symbol_size=100, category=0, value=number_dis)]

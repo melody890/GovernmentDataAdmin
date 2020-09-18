@@ -1,50 +1,178 @@
 {% load static %}
-<!doctype html>
-<html lang="zh" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta http-equiv="Content-Language" content="en" />
-    <meta name="msapplication-TileColor" content="#2d89ef">
-    <meta name="theme-color" content="#4188c9">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="HandheldFriendly" content="True">
-    <meta name="MobileOptimized" content="320">
-    <link rel="icon" href="{% static 'assets/images/icon.png' %}" type="image/x-icon"/>
-    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/icon.png' %}" />
-    <!-- Generated: 2019-04-04 16:55:45 +0200 -->
-    <title>Login-Government Data Admin</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext">
-    <!-- Dashboard Core -->
-    <link href="{% static 'assets/css/dashboard.css' %}" rel="stylesheet" />
-    <script src="{% static 'assets/js/dashboard.js' %}"></script>
-    <!-- c3.js Charts Plugin -->
-    <link href="{% static 'assets/plugins/charts-c3/plugin.css' %}" rel="stylesheet" />
-    <script src="{% static 'assets/plugins/charts-c3/plugin.js' %}"></script>
-    <!-- Google Maps Plugin -->
-    <link href="{% static 'assets/plugins/maps-google/plugin.css' %}" rel="stylesheet" />
-    <script src="{% static 'assets/plugins/maps-google/plugin.js' %}"></script>
-    <!-- Input Mask Plugin -->
-    <script src="{% static 'assets/plugins/input-mask/plugin.js' %}"></script>
-    <!-- Datatables Plugin -->
-    <script src="{% static 'assets/plugins/datatables/plugin.js' %}"></script>
-</head>
-<body class="">
-    <div class="page">
-        <div class="page-content">
-            <div class="container text-center">
-                <div class="display-1 text-muted mb-5"><i class="si si-exclamation"></i> ERROR</div>
-                <h1 class="h2 mb-3">{{ info }}</h1>
-                <p class="h4 text-muted font-weight-normal mb-7">We are sorry but your request contains bad syntax and cannot be fulfilled&hellip;</p>
-                <a class="btn btn-primary" href="javascript:history.back()">
-                    <i class="fe fe-arrow-left mr-2"></i>Go back
+<!--<!doctype html>-->
+<!--<html lang="zh" dir="ltr">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+<!--    <meta http-equiv="Content-Language" content="en" />-->
+<!--    <meta name="msapplication-TileColor" content="#2d89ef">-->
+<!--    <meta name="theme-color" content="#4188c9">-->
+<!--    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>-->
+<!--    <meta name="apple-mobile-web-app-capable" content="yes">-->
+<!--    <meta name="mobile-web-app-capable" content="yes">-->
+<!--    <meta name="HandheldFriendly" content="True">-->
+<!--    <meta name="MobileOptimized" content="320">-->
+<!--    <link rel="icon" href="{% static 'assets/images/icon.png' %}" type="image/x-icon"/>-->
+<!--    <link rel="shortcut icon" type="image/x-icon" href="{% static 'assets/images/icon.png' %}" />-->
+<!--    &lt;!&ndash; Generated: 2019-04-04 16:55:45 +0200 &ndash;&gt;-->
+<!--    <title>Login-Government Data Admin</title>-->
+<!--    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">-->
+<!--    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300i,400,400i,500,500i,600,600i,700,700i&amp;subset=latin-ext">-->
+<!--    &lt;!&ndash; Dashboard Core &ndash;&gt;-->
+<!--    <link href="{% static 'assets/css/dashboard.css' %}" rel="stylesheet" />-->
+<!--    <script src="{% static 'assets/js/dashboard.js' %}"></script>-->
+<!--    &lt;!&ndash; c3.js Charts Plugin &ndash;&gt;-->
+<!--    <link href="{% static 'assets/plugins/charts-c3/plugin.css' %}" rel="stylesheet" />-->
+<!--    <script src="{% static 'assets/plugins/charts-c3/plugin.js' %}"></script>-->
+<!--    &lt;!&ndash; Google Maps Plugin &ndash;&gt;-->
+<!--    <link href="{% static 'assets/plugins/maps-google/plugin.css' %}" rel="stylesheet" />-->
+<!--    <script src="{% static 'assets/plugins/maps-google/plugin.js' %}"></script>-->
+<!--    &lt;!&ndash; Input Mask Plugin &ndash;&gt;-->
+<!--    <script src="{% static 'assets/plugins/input-mask/plugin.js' %}"></script>-->
+<!--    &lt;!&ndash; Datatables Plugin &ndash;&gt;-->
+<!--    <script src="{% static 'assets/plugins/datatables/plugin.js' %}"></script>-->
+<!--</head>-->
+<!--<body class="">-->
+<!--    <div class="page">-->
+<!--        <div class="page-content">-->
+<!--            <div class="container text-center">-->
+<!--                <div class="display-1 text-muted mb-5"><i class="si si-exclamation"></i> ERROR</div>-->
+<!--                <h1 class="h2 mb-3">{{ info }}</h1>-->
+<!--                <p class="h4 text-muted font-weight-normal mb-7">We are sorry but your request contains bad syntax and cannot be fulfilled&hellip;</p>-->
+<!--                <a class="btn btn-primary" href="javascript:history.back()">-->
+<!--                    <i class="fe fe-arrow-left mr-2"></i>Go back-->
+<!--                </a>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="zh">-->
+<!--  <head>-->
+<!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">-->
+<!--    &lt;!&ndash; Meta, title, CSS, favicons, etc. &ndash;&gt;-->
+<!--    <meta charset="utf-8">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="IE=edge">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1">-->
+
+<!--    <title>发生错误</title>-->
+
+<!--    &lt;!&ndash; Bootstrap &ndash;&gt;-->
+<!--    <link href="{% static 'vendors/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">-->
+<!--    &lt;!&ndash; Font Awesome &ndash;&gt;-->
+<!--    <link href="{% static 'vendors/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">-->
+<!--    &lt;!&ndash; NProgress &ndash;&gt;-->
+<!--    <link href="{% static 'vendors/nprogress/nprogress.css' %}" rel="stylesheet">-->
+
+<!--    &lt;!&ndash; Custom Theme Style &ndash;&gt;-->
+<!--    <link href="{% static 'build/css/custom.min.css' %}" rel="stylesheet">-->
+<!--  </head>-->
+
+<!--  <body class="nav-md">-->
+<!--    <div class="container body">-->
+<!--      <div class="main_container">-->
+<!--        &lt;!&ndash; page content &ndash;&gt;-->
+<!--        <div class="col-md-12">-->
+<!--          <div class="col-middle">-->
+<!--            <div class="text-center text-center">-->
+<!--              <h1 class="error-number">输入错误</h1>-->
+<!--                <h2>{{ info }}</h2>-->
+<!--              <div class="mid_center">-->
+<!--                    <a type="button" class="btn btn-secondary btn-lg" href="javascript:history.back()">返回上个页面</a>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--        &lt;!&ndash; /page content &ndash;&gt;-->
+<!--      </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; jQuery &ndash;&gt;-->
+<!--    <script src="{% static 'vendors/jquery/dist/jquery.min.js' %}"></script>-->
+<!--    &lt;!&ndash; Bootstrap &ndash;&gt;-->
+<!--   <script src="{% static 'vendors/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>-->
+<!--    &lt;!&ndash; FastClick &ndash;&gt;-->
+<!--    <script src="{% static 'vendors/fastclick/lib/fastclick.js' %}"></script>-->
+<!--    &lt;!&ndash; NProgress &ndash;&gt;-->
+<!--    <script src="{% static 'vendors/nprogress/nprogress.js' %}"></script>-->
+
+<!--    &lt;!&ndash; Custom Theme Scripts &ndash;&gt;-->
+<!--    <script src="../build/js/custom.min.js' %}"></script>-->
+<!--  </body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>注册</title>
+
+    <!-- Bootstrap -->
+    <link href="{% static 'vendors/bootstrap/dist/css/bootstrap.min.css' %}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{% static 'vendors/font-awesome/css/font-awesome.min.css' %}" rel="stylesheet">
+    <!-- NProgress -->
+    <link href="{% static 'vendors/nprogress/nprogress.css' %}" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="{% static 'vendors/animate.css/animate.min.css' %}" rel="stylesheet">
+
+    <!-- Custom Theme Style -->
+    <link href="{% static 'build/css/custom.min.css' %}" rel="stylesheet">
+  </head>
+  <body class="login">
+    <div>
+      <a class="hiddenanchor" id="signup"></a>
+      <a class="hiddenanchor" id="signin"></a>
+
+      <div class="login_wrapper">
+        <div class="animate form login_form">
+          <section class="login_content">
+            <form method="post">
+              {% csrf_token %}
+              <h1><i class="fa fa-exclamation"></i>   输入错误</h1>
+                <div class="col-md-12">
+                  <div class="col-middle">
+                    <div class="text-center text-center">
+                        <h2>{{ info }}</h2>
+                      <div class="mid_center">
+                      </div>
+                    </div>
+                  </div>
+               </div>
+                <a href="javascript:history.back()">
+                <div>
+                    <button type="button" class="btn btn-secondary btn-xs">返回上个页面</>
+                </div>
                 </a>
-            </div>
+
+              <div class="clearfix"></div>
+
+              <div class="separator">
+                <div class="clearfix"></div>
+                <br/>
+                <div>
+                  <a href="{% url 'user:login' %}" class="to_register"> 帮助 </a>
+                </div>
+                <br/>
+
+                <div>
+                  <p>©2020 GovernmentDataAdmin</p>
+                </div>
+              </div>
+            </form>
+          </section>
         </div>
+
+
+      </div>
     </div>
-</body>
+  </body>
 </html>

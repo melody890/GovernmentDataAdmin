@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 import notifications.urls
+import captcha.urls
 
 from django.contrib import admin
 from django.conf.urls import include
@@ -33,6 +34,7 @@ urlpatterns = [
     path('notifications/', include(notifications.urls, namespace='notifications')),
     path('notice/', include('notice.urls', namespace='notice')),
     path('webinfo/', include('webinfo.urls', namespace='webinfo')),
+    path('captcha/', include('captcha.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

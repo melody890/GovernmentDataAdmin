@@ -1,3 +1,5 @@
+from captcha.fields import CaptchaField
+
 from django import forms
 from django.contrib.auth.models import User
 from .models import Profile
@@ -14,6 +16,7 @@ class ProfileForm(forms.ModelForm):
 class UserLoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField()
+    captcha = CaptchaField(error_messages={'invalid':'验证码错误啊'})
 
 
 class UserRegisterForm(forms.ModelForm):
@@ -37,3 +40,8 @@ class ResetForm(forms.Form):
 
 class ResetPwForm(forms.Form):
     password = forms.CharField()
+
+class PermissionApplyForm(forms.Form):
+    apply_permission = forms.CharField()
+    apply_unit = forms.CharField()
+    validation = forms.CharField()

@@ -1,32 +1,20 @@
-        <!-- Left Sidebar - style you can find in sidebar.scss  -->
-        <!-- ============================================================== -->
-        <div class="navbar-default sidebar" role="navigation">
-            <div class="sidebar-nav slimscrollsidebar">
-                <div class="sidebar-head">
-                    <h3><span class="fa-fw open-close"><i class="ti-close ti-menu"></i></span> <span class="hide-menu">Navigation</span></h3>
-                </div>
-                <ul class="nav" id="side-menu">
-                    <li style="padding: 70px 0 0;">
-                        <a href="{% url 'chart:charts' %}" class="waves-effect"><i class="fa fa-bar-chart-o fa-fw" aria-hidden="true"></i>Charts</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'kgraph:kgraph' %}" class="waves-effect"><i class="fa fa-sitemap fa-fw" aria-hidden="true"></i>Knowledge Graph</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'event:post' %}" class="waves-effect"><i class="fa fa-upload fa-fw" aria-hidden="true"></i>Post</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'event:list' %}" class="waves-effect"><i class="fa fa-pencil fa-fw" aria-hidden="true"></i>Dispose</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'user:edit' user.id %}" class="waves-effect"><i class="fa fa-user fa-fw" aria-hidden="true"></i>Profile</a>
-                    </li>
-                    <li>
-                        <a href="{% url 'event:recent' %}" class="waves-effect"><i class="fa fa-user fa-fw" aria-hidden="true"></i>Recent</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-        <!-- ============================================================== -->
-        <!-- End Left Sidebar -->
-        <!-- ============================================================== -->
+{% load static %}
+<div id="sidebar-menu" class="main_menu_side hidden-print main_menu" >
+  <div class="menu_section">
+    <h3>General</h3>
+    <ul class="nav side-menu">
+      <li><a size="6" href="{% url 'home:dashboard' %}"><i class="fa fa-home" ></i> 主页 </a>
+      </li>
+      <li><a size="6" href="{% url 'chart:charts' %}"><i class="fa fa-bar-chart-o" ></i> 图表</a>
+      </li>
+      <li><a size="6" href="{% url 'kgraph:kgraph' %}"><i class="fa fa-arrows" ></i> 知识图谱 </a>
+      </li>
+      <li><a size="6" href="{% url 'event:list' %}"><i class="fa fa-table" ></i> 事件列表 </a>
+      </li>
+      <li><a size="6" href="{% url 'event:post' %}"><i class="fa fa-arrow-up" ></i> 事件上传 </a>
+      </li>
+      <li><a size="6" href="{% url 'user:permissionView' %}"><i class="fa fa-male" ></i> 成员管理 </a>
+      </li>
+    </ul>
+  </div>
+</div>
